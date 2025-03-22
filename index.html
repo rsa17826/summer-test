@@ -19,7 +19,7 @@
 </span>
 <table id="table">
   <thead>
-    <tr>
+    <tr style="position: sticky;">
       <th>name</th>
       <th>PLAYER COUNT</th>
       <th>likes</th>
@@ -29,6 +29,41 @@
 </table>
 <script>
   const a = loadlib("allfuncs")
+  window.globalrequest = (data) => {
+    if (typeof data == "string") data = { url: data }
+    var { url, method, headers } = data
+    headers ??= []
+    method ??= "GET"
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+
+      xhr.open(method, url, true)
+
+      // Set request headers
+      for (const key in headers) {
+        xhr.setRequestHeader(key, headers[key])
+      }
+
+      // Set up the callback for when the request completes
+      xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          // Resolve the promise with the response data
+          resolve({ text: xhr.responseText })
+        } else {
+          // Reject the promise with the status text
+          reject(new Error(xhr.statusText))
+        }
+      }
+
+      // Handle network errors
+      xhr.onerror = function () {
+        reject(new Error("Network Error"))
+      }
+
+      // Send the request with the data
+      xhr.send(data.body ? data.body : undefined)
+    })
+  }
   var timeout = setTimeout(() => {
     if (!window.globalrequest) {
       alert(
@@ -45,7 +80,9 @@
   }, 100)
   async function start() {
     a.qs(".installlinks").classList.add("hide")
-    const API = (window.API = await new jsonblobapi("1352826891148648448"))
+    const API = (window.API = await new jsonblobapi(
+      "1352826891148648448"
+    ))
     // const API = (window.API = await new protectedtextapi(
     //   "summerplans",
     //   "summertest"

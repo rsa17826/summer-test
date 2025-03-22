@@ -73,3 +73,12 @@ tr > td:first-of-type {
   align-items: center;
   background-color: var(--dark-purple);
 }
+
+thead {
+  border-collapse: collapse;
+  top: -1px; /* Stick to the top of the container */
+  background-color: var(
+    --dark-purple
+  ); /* Background color for the header */
+  position: sticky; /* Make the header sticky */
+}
