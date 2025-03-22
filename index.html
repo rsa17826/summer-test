@@ -293,10 +293,12 @@
 
   async function like(thing, liked) {
     var data = JSON.parse(await API.load())
-    data
-      .find((e) => e.name == thing)
-      .likes.find((e) => e.name == localStorage.name).liked = liked
-    await API.save(JSON.stringify(data))
+    try {
+      data
+        .find((e) => e.name == thing)
+        .likes.find((e) => e.name == localStorage.name).liked = liked
+      await API.save(JSON.stringify(data))
+    } catch (e) {}
     loadAllData(data)
   }
 
@@ -313,38 +315,52 @@
 
   async function updateDesc(event) {
     event.preventDefault()
-    var data = JSON.parse(await API.load())
-    var thing = data.find((e) => e.name == event.target.thingname)
-    thing.desc = event.target.value
-    API.save(JSON.stringify(data))
+    try {
+      var data = JSON.parse(await API.load())
+      var thing = data.find((e) => e.name == event.target.thingname)
+      thing.desc = event.target.value
+      API.save(JSON.stringify(data))
+    } catch (e) {}
     loadAllData(data)
   }
 
   async function validPlayerCount(event) {
     event.preventDefault()
     var data = JSON.parse(await API.load())
-    var thing = data.find((e) => e.name == event.target.thingname)
-    thing.validPlayerCounts ??= []
-    if (!thing.validPlayerCounts.includes(event.target.textContent)) {
-      thing.validPlayerCounts.push(event.target.textContent)
-      API.save(JSON.stringify(data))
+    try {
+      var thing = data.find((e) => e.name == event.target.thingname)
+      thing.validPlayerCounts ??= []
+      if (
+        !thing.validPlayerCounts.includes(event.target.textContent)
+      ) {
+        thing.validPlayerCounts.push(event.target.textContent)
+        API.save(JSON.stringify(data))
+        loadAllData(data)
+      }
+    } catch (e) {
       loadAllData(data)
     }
   }
   async function invalidPlayerCount(event) {
     event.preventDefault()
     var data = JSON.parse(await API.load())
-    var thing = data.find((e) => e.name == event.target.thingname)
-    thing.validPlayerCounts ??= []
-    if (thing.validPlayerCounts.includes(event.target.textContent)) {
-      thing.validPlayerCounts.splice(
-        thing.validPlayerCounts.indexOf(event.target.textContent),
-        1
-      )
-      loadAllData(data)
-      await API.save(JSON.stringify(data))
-      loadAllData(JSON.parse(await API.load()))
-    } else {
+    try {
+      var thing = data.find((e) => e.name == event.target.thingname)
+      thing.validPlayerCounts ??= []
+      if (
+        thing.validPlayerCounts.includes(event.target.textContent)
+      ) {
+        thing.validPlayerCounts.splice(
+          thing.validPlayerCounts.indexOf(event.target.textContent),
+          1
+        )
+        loadAllData(data)
+        await API.save(JSON.stringify(data))
+        loadAllData(JSON.parse(await API.load()))
+      } else {
+        loadAllData(data)
+      }
+    } catch (e) {
       loadAllData(data)
     }
   }
@@ -367,16 +383,24 @@
 
   async function removeEvent(name) {
     var data = JSON.parse(await API.load())
-    data.splice(data.indexOf(data.find((e) => e.name == name)), 1)
-    API.save(JSON.stringify(data))
-    loadAllData(data)
-    loadAllData(JSON.parse(await API.load()))
+    try {
+      data.splice(data.indexOf(data.find((e) => e.name == name)), 1)
+      API.save(JSON.stringify(data))
+      loadAllData(data)
+      loadAllData(JSON.parse(await API.load()))
+    } catch (e) {
+      loadAllData(data)
+    }
   }
   async function renameEvent(oldname, newname) {
     var data = JSON.parse(await API.load())
-    data.find((e) => e.name == oldname).name = newname
-    loadAllData(data)
-    await API.save(JSON.stringify(data))
-    loadAllData(JSON.parse(await API.load()))
+    try {
+      data.find((e) => e.name == oldname).name = newname
+      loadAllData(data)
+      await API.save(JSON.stringify(data))
+      loadAllData(JSON.parse(await API.load()))
+    } catch (e) {
+      loadAllData(data)
+    }
   }
 </script>
