@@ -78,11 +78,9 @@ tr > td:first-of-type {
 
 thead {
   border-collapse: collapse;
-  top: -1px; /* Stick to the top of the container */
-  background-color: var(
-    --dark-purple
-  ); /* Background color for the header */
-  position: sticky; /* Make the header sticky */
+  top: -1px;
+  background-color: var(--dark-purple);
+  position: sticky;
 }
 
 * > textarea.desc,
@@ -97,4 +95,15 @@ textarea.desc {
   field-sizing: content;
   max-height: 150px;
   max-width: 400px;
+}
+#sticky {
+  position: sticky;
+  top: 29px;
+  z-index: 11;
+  box-sizing: border-box;
+}
+@media screen and (max-width: 555px) {
+  #sticky.scrolled {
+    top: 46px;
+  }
 }

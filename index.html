@@ -19,6 +19,10 @@
 </span>
 <button id="download">download</button>
 <input type="text" id="username" placeholder="enter your name here" />
+<div id="sticky">
+  <input type="text" id="taskname" placeholder="name of new task" />
+  <button id="addtask">add task</button>
+</div>
 <table id="table">
   <thead>
     <tr style="position: sticky">
@@ -35,7 +39,18 @@
   // add edit your name button
   // add description as textarea save onchange
   // add my ideas
+
   const a = loadlib("allfuncs")
+
+  a.listen(window, "scroll", function () {
+    const stickyElement = a.qs("#sticky")
+    if (window.scrollY >= 50) {
+      stickyElement.classList.add("scrolled")
+    } else {
+      stickyElement.classList.remove("scrolled")
+    }
+  })
+
   a.listen(a.qs("#download"), "click", async (e) => {
     a.download(await API.load(), "summer test backup - " + Date.now())
   })
@@ -79,20 +94,24 @@
       xhr.send(data.body ? data.body : undefined)
     })
   }
-  var timeout = setTimeout(() => {
-    if (!window.globalrequest) {
-      alert(
-        "click the link for violentmonkey, install the extension then click globalrequest and install that too"
-      )
-    }
-  }, 4000)
-  var interval = setInterval(() => {
-    if (window.globalrequest) {
-      clearTimeout(timeout)
-      clearInterval(interval)
-      start()
-    }
-  }, 100)
+  if (window.globalrequest) {
+    start()
+  } else {
+    var timeout = setTimeout(() => {
+      if (!window.globalrequest) {
+        alert(
+          "click the link for violentmonkey, install the extension then click globalrequest and install that too"
+        )
+      }
+    }, 4000)
+    var interval = setInterval(() => {
+      if (window.globalrequest) {
+        clearTimeout(timeout)
+        clearInterval(interval)
+        start()
+      }
+    }, 100)
+  }
   async function start() {
     a.qs(".installlinks").classList.add("hide")
     const API = (window.API = await new jsonblobapi(
