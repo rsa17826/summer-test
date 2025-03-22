@@ -31,9 +31,11 @@ html {
   background-color: var(--space-cadet);
 }
 button,
-input {
+input,
+textarea {
   background-color: var(--celadon);
   border-color: var(--tea-green);
+  color: #000;
 }
 
 tr,
@@ -81,4 +83,18 @@ thead {
     --dark-purple
   ); /* Background color for the header */
   position: sticky; /* Make the header sticky */
+}
+
+* > textarea.desc,
+textarea.desc {
+  overflow: scroll;
+  height: fit-content;
+  min-width: 100px;
+  min-height: 100px;
+  resize: none;
+  box-sizing: border-box;
+  border: 2px solid gray;
+  field-sizing: content;
+  max-height: 150px;
+  max-width: 400px;
 }

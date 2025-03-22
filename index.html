@@ -17,18 +17,32 @@
   >
   <a href="./globalrequest.user.js" target="_self">globalrequest</a>
 </span>
+<button id="download">download</button>
+<input type="text" id="username" placeholder="enter your name here" />
 <table id="table">
   <thead>
     <tr style="position: sticky">
       <th>name</th>
       <th>PLAYER COUNT</th>
       <th>likes</th>
+      <th>description</th>
     </tr>
   </thead>
   <tbody></tbody>
 </table>
 <script>
+  // add edit name button
+  // add edit your name button
+  // add description as textarea save onchange
+  // add my ideas
   const a = loadlib("allfuncs")
+  a.listen(a.qs("#download"), "click", async (e) => {
+    a.download(await API.load(), "summer test backup - " + Date.now())
+  })
+  a.qs("#username").value = localStorage.name ?? ""
+  a.listen(a.qs("#username"), "change", () => {
+    localStorage.name = a.qs("#username").value
+  })
   window.globalrequest = (data) => {
     if (typeof data == "string") data = { url: data }
     var { url, method, headers } = data
@@ -94,8 +108,9 @@
   }
   function loaddata(idx, data) {
     const table = a.qs("#table>tbody")
-    var { name, likes, validPlayerCounts } = data
+    var { name, likes, validPlayerCounts, desc } = data
     validPlayerCounts ??= []
+    desc ??= ""
     if (table.children.length <= idx)
       table.appendChild(
         a.newelem(
@@ -161,6 +176,12 @@
                 })
               )
             ),
+            a.newelem("td", {}, [
+              a.newelem("textarea", {
+                class: "desc",
+                onchange: updateDesc,
+              }),
+            ]),
           ]
         )
       )
@@ -200,6 +221,9 @@
           ? "disliked"
           : "likable"
     }
+    var descElem = a.qs("tr>td:nth-of-type(4)>textarea.desc", child)
+    descElem.value = desc
+    descElem.thingname = name
     // }
   }
 
@@ -223,9 +247,17 @@
     }
   }
 
+  async function updateDesc(event) {
+    event.preventDefault()
+    var data = JSON.parse(await API.load())
+    var thing = data.find((e) => e.name == event.target.thingname)
+    thing.desc = event.target.value
+    API.save(JSON.stringify(data))
+    loadAllData(data)
+  }
+
   async function validPlayerCount(event) {
     event.preventDefault()
-    log(event.target, this)
     var data = JSON.parse(await API.load())
     var thing = data.find((e) => e.name == event.target.thingname)
     thing.validPlayerCounts ??= []
@@ -237,7 +269,6 @@
   }
   async function invalidPlayerCount(event) {
     event.preventDefault()
-    log(event.target, this)
     var data = JSON.parse(await API.load())
     var thing = data.find((e) => e.name == event.target.thingname)
     thing.validPlayerCounts ??= []
@@ -246,7 +277,10 @@
         thing.validPlayerCounts.indexOf(event.target.textContent),
         1
       )
-      API.save(JSON.stringify(data))
+      loadAllData(data)
+      await API.save(JSON.stringify(data))
+      loadAllData(await API.load())
+    } else {
       loadAllData(data)
     }
   }
@@ -262,8 +296,9 @@
         { name: "mike", liked: 0 },
       ],
     })
-    API.save(JSON.stringify(data))
     loadAllData(data)
+    await API.save(JSON.stringify(data))
+    loadAllData(await API.load())
   }
 
   async function removeEvent(name) {
@@ -272,11 +307,13 @@
     data.splice(data.indexOf(data.find((e) => e.name == name)), 1)
     API.save(JSON.stringify(data))
     loadAllData(data)
+    loadAllData(await API.load())
   }
   async function renameEvent(oldname, newname) {
     var data = JSON.parse(await API.load())
     data.find((e) => e.name == oldname).name = newname
-    API.save(JSON.stringify(data))
     loadAllData(data)
+    await API.save(JSON.stringify(data))
+    loadAllData(await API.load())
   }
 </script>
