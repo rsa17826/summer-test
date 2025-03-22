@@ -2,7 +2,8 @@
 <script src="./js globals/libloader.user.js"></script>
 <script src="./js globals/allfuncs.user.js"></script>
 <script src="./js globals/better logs.user.js"></script>
-<script src="./main.js"></script>
+
+<!-- <script src="./main.js"></script> -->
 
 <script src="./cryptojs.js"></script>
 <script src="./protectedtextapi.js"></script>
@@ -36,10 +37,10 @@
 </table>
 <script>
   // add edit name button
-  // add edit your name button
-  // add description as textarea save onchange
   // add my ideas
-
+  // add way to filter by users liked/disliked/likable
+  // add way to filter by valid player counts
+  // add reload button/polling reload
   const a = loadlib("allfuncs")
 
   a.listen(window, "scroll", function () {
@@ -57,6 +58,9 @@
   a.qs("#username").value = localStorage.name ?? ""
   a.listen(a.qs("#username"), "change", () => {
     localStorage.name = a.qs("#username").value
+  })
+  a.listen(a.qs("#addtask"), "click", () => {
+    addNewEvent(a.qs("#taskname").value)
   })
   window.globalrequest = (data) => {
     if (typeof data == "string") data = { url: data }
@@ -138,7 +142,21 @@
             class: "row",
           },
           [
-            a.newelem("td", {}),
+            a.newelem("td", {}, [
+              a.newelem("input", {
+                class: "taskname",
+                onchange(e) {
+                  renameEvent(this.oldname, this.value)
+                },
+              }),
+              a.newelem("button", {
+                innerHTML: "delete",
+                id: "delete",
+                onclick(e) {
+                  removeEvent(this.thingname)
+                },
+              }),
+            ]),
             a.newelem("td", {}, [
               a.newelem("div", {
                 textContent: 1,
@@ -206,7 +224,10 @@
       )
     // else {
     var child = [...table.children][idx]
-    a.qs("tr>td", child).textContent = name
+    a.qs("tr>td>button#delete", child).thingname =
+      a.qs("tr>td>input", child).oldname =
+      a.qs("tr>td>input", child).value =
+        name
     var validPlayerCountsElems = a.qsa(
       "tr>td:nth-of-type(2)>div.playerCount",
       child
@@ -248,7 +269,6 @@
 
   async function like(thing, liked) {
     var data = JSON.parse(await API.load())
-    log("liking", thing, localStorage.name, liked)
     data
       .find((e) => e.name == thing)
       .likes.find((e) => e.name == localStorage.name).liked = liked
@@ -298,7 +318,7 @@
       )
       loadAllData(data)
       await API.save(JSON.stringify(data))
-      loadAllData(await API.load())
+      loadAllData(JSON.parse(await API.load()))
     } else {
       loadAllData(data)
     }
@@ -317,22 +337,21 @@
     })
     loadAllData(data)
     await API.save(JSON.stringify(data))
-    loadAllData(await API.load())
+    loadAllData(JSON.parse(await API.load()))
   }
 
   async function removeEvent(name) {
     var data = JSON.parse(await API.load())
-    log(data.find((e) => e.name == name))
     data.splice(data.indexOf(data.find((e) => e.name == name)), 1)
     API.save(JSON.stringify(data))
     loadAllData(data)
-    loadAllData(await API.load())
+    loadAllData(JSON.parse(await API.load()))
   }
   async function renameEvent(oldname, newname) {
     var data = JSON.parse(await API.load())
     data.find((e) => e.name == oldname).name = newname
     loadAllData(data)
     await API.save(JSON.stringify(data))
-    loadAllData(await API.load())
+    loadAllData(JSON.parse(await API.load()))
   }
 </script>
