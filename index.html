@@ -19,9 +19,19 @@
   <a href="./globalrequest.user.js" target="_self">globalrequest</a>
 </span>
 <button id="download">download</button>
-<input type="text" id="username" placeholder="enter your name here" />
+<input
+  type="text"
+  autocomplete="off"
+  id="username"
+  placeholder="enter your name here"
+/>
 <div id="sticky">
-  <input type="text" id="taskname" placeholder="name of new task" />
+  <input
+    autocomplete="off"
+    type="text"
+    id="taskname"
+    placeholder="name of new task"
+  />
   <button id="addtask">add task</button>
 </div>
 <table id="table">
@@ -36,7 +46,6 @@
   <tbody></tbody>
 </table>
 <script>
-  // add edit name button
   // add my ideas
   // add way to filter by users liked/disliked/likable
   // add way to filter by valid player counts
@@ -142,21 +151,32 @@
             class: "row",
           },
           [
-            a.newelem("td", {}, [
-              a.newelem("input", {
-                class: "taskname",
-                onchange(e) {
-                  renameEvent(this.oldname, this.value)
-                },
-              }),
-              a.newelem("button", {
-                innerHTML: "delete",
-                id: "delete",
-                onclick(e) {
-                  removeEvent(this.thingname)
-                },
-              }),
-            ]),
+            a.newelem(
+              "td",
+              {
+                display: "flex",
+                flexDirection: "column",
+                gap: "5px",
+              },
+              [
+                a.newelem("input", {
+                  autocomplete: "off",
+                  fieldSizing: "content",
+                  maxWidth: "190px",
+                  class: "taskname",
+                  onchange(e) {
+                    renameEvent(this.oldname, this.value)
+                  },
+                }),
+                a.newelem("button", {
+                  innerHTML: "delete",
+                  id: "delete",
+                  onclick(e) {
+                    removeEvent(this.thingname)
+                  },
+                }),
+              ]
+            ),
             a.newelem("td", {}, [
               a.newelem("div", {
                 textContent: 1,
@@ -215,6 +235,7 @@
             ),
             a.newelem("td", {}, [
               a.newelem("textarea", {
+                autocomplete: "off",
                 class: "desc",
                 onchange: updateDesc,
               }),
@@ -277,6 +298,7 @@
   }
 
   function loadAllData(data) {
+    data = data.toReversed()
     for (var i = 0; i < data.length; i++) {
       loaddata(i, data[i])
     }
