@@ -25,6 +25,9 @@
   id="username"
   placeholder="enter your name here"
 />
+<input type="checkbox" name="notification" id="notification" />
+<label for="notification">notify on data change</label>
+<br>
 <span>left click for yes, right click for no</span>
 <div id="sticky">
   <input
@@ -61,7 +64,10 @@
       stickyElement.classList.remove("scrolled")
     }
   })
-
+  a.qs("#notification").checked = localStorage.sendnoti == "true"
+  a.listen(a.qs("#notification"), "change", (e) => {
+    localStorage.sendnoti = String(a.qs("#notification").checked)
+  })
   a.listen(a.qs("#download"), "click", async (e) => {
     a.download(await API.load(), "summer test backup - " + Date.now())
   })
@@ -151,7 +157,7 @@
       if (data !== window.lastdata) {
         loadAllData(data)
         window.lastdata = data
-        if (localStorage.name == "river") {
+        if (localStorage.sendnoti == "true") {
           sendnoti()
         }
       }
