@@ -14,7 +14,7 @@ class jsonblobapi {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        data,
+        body:data,
       })
     )
     return

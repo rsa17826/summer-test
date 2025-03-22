@@ -19,7 +19,7 @@
 </span>
 <table id="table">
   <thead>
-    <tr style="position: sticky;">
+    <tr style="position: sticky">
       <th>name</th>
       <th>PLAYER COUNT</th>
       <th>likes</th>
@@ -51,7 +51,8 @@
           resolve({ text: xhr.responseText })
         } else {
           // Reject the promise with the status text
-          reject(new Error(xhr.statusText))
+          error(xhr.statusText, xhr.responseText)
+          reject(new Error(xhr.responseText))
         }
       }
 
@@ -216,6 +217,10 @@
     for (var i = 0; i < data.length; i++) {
       loaddata(i, data[i])
     }
+    var children = a.qsa("table>tbody>*")
+    while (children.length > data.length) {
+      children.pop().remove()
+    }
   }
 
   async function validPlayerCount(event) {
@@ -244,5 +249,34 @@
       API.save(JSON.stringify(data))
       loadAllData(data)
     }
+  }
+  async function addNewEvent(name) {
+    var data = JSON.parse(await API.load())
+    data.push({
+      name,
+      likes: [
+        { name: "jaden", liked: 0 },
+        { name: "river", liked: 0 },
+        { name: "mom", liked: 0 },
+        { name: "pheonix", liked: 0 },
+        { name: "mike", liked: 0 },
+      ],
+    })
+    API.save(JSON.stringify(data))
+    loadAllData(data)
+  }
+
+  async function removeEvent(name) {
+    var data = JSON.parse(await API.load())
+    log(data.find((e) => e.name == name))
+    data.splice(data.indexOf(data.find((e) => e.name == name)), 1)
+    API.save(JSON.stringify(data))
+    loadAllData(data)
+  }
+  async function renameEvent(oldname, newname) {
+    var data = JSON.parse(await API.load())
+    data.find((e) => e.name == oldname).name = newname
+    API.save(JSON.stringify(data))
+    loadAllData(data)
   }
 </script>
