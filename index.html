@@ -1,2 +1,208 @@
 <script src="./js globals/live.js"></script>
-asd
+<script src="./js globals/libloader.user.js"></script>
+<script src="./js globals/allfuncs.user.js"></script>
+<script src="./js globals/better logs.user.js"></script>
+
+<script src="./cryptojs.js"></script>
+<script src="./protectedtextapi.js"></script>
+
+<link rel="stylesheet" href="style.css" />
+<span class="installlinks">
+  <a
+    href="https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag"
+    target="_blank"
+    >violentmonkey</a
+  >
+  <a href="./globalrequest.user.js" target="_blank">globalrequest</a>
+</span>
+<table id="table">
+  <thead>
+    <tr>
+      <th>name</th>
+      <th>PLAYER COUNT</th>
+      <th>likes</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+<script>
+  const a = loadlib("allfuncs")
+  var timeout = setTimeout(() => {
+    if (!window.globalrequest) {
+      alert(
+        "click the link for violentmonkey, install the extension then click globalrequest and install that too"
+      )
+    }
+  }, 4000)
+  var interval = setInterval(() => {
+    if (window.globalrequest) {
+      clearTimeout(timeout)
+      clearInterval(interval)
+      start()
+    }
+  }, 100)
+  async function start() {
+    a.qs(".installlinks").classList.add("hide")
+    const API = (window.API = await new protectedtextapi(
+      "summerplans",
+      "summertest"
+    ))
+    var data = JSON.parse(await API.load())
+    await a.bodyload()
+    loadAllData(data)
+  }
+  function loaddata(idx, data) {
+    const table = a.qs("#table>tbody")
+    var { name, likes, validPlayerCounts } = data
+    validPlayerCounts ??= []
+    if (table.children.length <= idx)
+      table.appendChild(
+        a.newelem(
+          "tr",
+          {
+            class: "row",
+          },
+          [
+            a.newelem("td", {}),
+            a.newelem("td", {}, [
+              a.newelem("div", {
+                textContent: 1,
+                class: "playerCount",
+                onclick: validPlayerCount,
+                oncontextmenu: invalidPlayerCount,
+              }),
+              a.newelem("div", {
+                textContent: 2,
+                class: "playerCount",
+                onclick: validPlayerCount,
+                oncontextmenu: invalidPlayerCount,
+              }),
+              a.newelem("div", {
+                class: "playerCount",
+                textContent: 3,
+                onclick: validPlayerCount,
+                oncontextmenu: invalidPlayerCount,
+              }),
+              a.newelem("div", {
+                textContent: 4,
+                class: "playerCount",
+                onclick: validPlayerCount,
+                oncontextmenu: invalidPlayerCount,
+              }),
+              a.newelem("div", {
+                textContent: 5,
+                class: "playerCount",
+                onclick: validPlayerCount,
+                oncontextmenu: invalidPlayerCount,
+              }),
+            ]),
+            a.newelem(
+              "td",
+              {
+                // justifyContent: "space-between",
+                gap: "2px",
+              },
+              likes.map((e) =>
+                a.newelem("div", {
+                  padding: "2px",
+                  onclick(e) {
+                    e.preventDefault()
+                    if (this.username == localStorage.name) {
+                      like(this.thingname, 1)
+                    }
+                  },
+                  oncontextmenu(e) {
+                    e.preventDefault()
+                    if (this.username == localStorage.name) {
+                      like(this.thingname, -1)
+                    }
+                  },
+                })
+              )
+            ),
+          ]
+        )
+      )
+    // else {
+    var child = [...table.children][idx]
+    a.qs("tr>td", child).textContent = name
+    var validPlayerCountsElems = a.qsa(
+      "tr>td:nth-of-type(2)>div.playerCount",
+      child
+    )
+    for (let child of validPlayerCountsElems) {
+      child.thingname = name
+      child.classList.remove(
+        !validPlayerCounts.includes(child.textContent)
+          ? "valid"
+          : "invalid"
+      )
+      child.classList.add(
+        validPlayerCounts.includes(child.textContent)
+          ? "valid"
+          : "invalid"
+      )
+    }
+    var likesParentElem = a.qs("tr>td:nth-of-type(3)", child)
+    var ii = 0
+    for (let ii = 0; ii < likes.length; ii++) {
+      let child = [...likesParentElem.children][ii]
+      var thislike = likes.sort((a, b) =>
+        a.name.localeCompare(b.name)
+      )[ii]
+      child.username = child.textContent = thislike.name
+      child.thingname = name
+      child.className =
+        thislike.liked == 1
+          ? "liked"
+          : thislike.liked == -1
+          ? "disliked"
+          : "likable"
+    }
+    // }
+  }
+
+  async function like(thing, liked) {
+    var data = JSON.parse(await API.load())
+    log("liking", thing, localStorage.name, liked)
+    data
+      .find((e) => e.name == thing)
+      .likes.find((e) => e.name == localStorage.name).liked = liked
+    await API.save(JSON.stringify(data))
+    loadAllData(data)
+  }
+
+  function loadAllData(data) {
+    for (var i = 0; i < data.length; i++) {
+      loaddata(i, data[i])
+    }
+  }
+
+  async function validPlayerCount(event) {
+    event.preventDefault()
+    log(event.target, this)
+    var data = JSON.parse(await API.load())
+    var thing = data.find((e) => e.name == event.target.thingname)
+    thing.validPlayerCounts ??= []
+    if (!thing.validPlayerCounts.includes(event.target.textContent)) {
+      thing.validPlayerCounts.push(event.target.textContent)
+      API.save(JSON.stringify(data))
+      loadAllData(data)
+    }
+  }
+  async function invalidPlayerCount(event) {
+    event.preventDefault()
+    log(event.target, this)
+    var data = JSON.parse(await API.load())
+    var thing = data.find((e) => e.name == event.target.thingname)
+    thing.validPlayerCounts ??= []
+    if (thing.validPlayerCounts.includes(event.target.textContent)) {
+      thing.validPlayerCounts.splice(
+        thing.validPlayerCounts.indexOf(event.target.textContent),
+        1
+      )
+      API.save(JSON.stringify(data))
+      loadAllData(data)
+    }
+  }
+</script>

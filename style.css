@@ -1,0 +1,77 @@
+* {
+  box-sizing: border-box;
+}
+:root {
+  /* CSS HEX */
+  --tea-green: #deefb7ff;
+  --celadon: #98dfafff;
+  --caribbean-current: #00635dff;
+  --space-cadet: #251f47ff;
+  --dark-purple: #260f26ff;
+}
+* {
+  color: var(--tea-green);
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+/* 
+@font-face {
+  font-family: DejaVuSansMono;
+  src: url("./fonts/DejaVuSansMono.ttf");
+}
+* {
+  font-family: DejaVuSansMono;
+} */
+
+/*  */
+body,
+html {
+  background-color: var(--space-cadet);
+  width: 500vw;
+  height: 500vh;
+}
+button,
+input {
+  background-color: var(--celadon);
+  border-color: var(--tea-green);
+}
+
+tr,
+tr > * {
+  border: 2px solid gray;
+  padding: 5px;
+}
+table {
+  border-collapse: collapse;
+}
+.liked,
+.valid {
+  border: 1px solid gray;
+  background-color: #0a0;
+}
+.disliked,
+.invalid {
+  background-color: #a00;
+  border: 1px solid gray;
+}
+.likable {
+  border: 1px solid gray;
+  background-color: #00a;
+}
+.hide {
+  display: none;
+}
+.playerCount {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid gray;
+}
+tr > td:first-of-type {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--dark-purple);
+}
