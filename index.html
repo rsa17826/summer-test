@@ -126,7 +126,36 @@
       }
     }, 100)
   }
+  function sendnoti() {
+    if (!("Notification" in window)) {
+      // Check if the browser supports notifications
+      alert("This browser does not support desktop notification")
+    } else if (Notification.permission === "granted") {
+      // Check whether notification permissions have already been granted;
+      // if so, create a notification
+      const notification = new Notification("data updated!")
+      // …
+    } else if (Notification.permission !== "denied") {
+      // We need to ask the user for permission
+      Notification.requestPermission().then((permission) => {
+        // If the user accepts, let's create a notification
+        if (permission === "granted") {
+          const notification = new Notification("data updated!")
+        }
+      })
+    }
+  }
   async function start() {
+    setInterval(async () => {
+      var data = await API.load()
+      if (data !== window.lastdata) {
+        loadAllData(data)
+        window.lastdata = data
+        if (localStorage.name == "river") {
+          sendnoti()
+        }
+      }
+    }, 5 * 60 * 1000)
     a.qs(".installlinks").classList.add("hide")
     const API = (window.API = await new jsonblobapi(
       "1352826891148648448"
@@ -136,6 +165,7 @@
     //   "summertest"
     // ))
     var data = JSON.parse(await API.load())
+    window.lastdata = data
     await a.bodyload()
     loadAllData(data)
   }
@@ -319,7 +349,8 @@
       var data = JSON.parse(await API.load())
       var thing = data.find((e) => e.name == event.target.thingname)
       thing.desc = event.target.value
-      API.save(JSON.stringify(data))
+      await API.save(JSON.stringify(data))
+      loadAllData(data)
     } catch (e) {}
     loadAllData(data)
   }
@@ -334,8 +365,9 @@
         !thing.validPlayerCounts.includes(event.target.textContent)
       ) {
         thing.validPlayerCounts.push(event.target.textContent)
-        API.save(JSON.stringify(data))
         loadAllData(data)
+        await API.save(JSON.stringify(data))
+        loadAllData(JSON.parse(await API.load()))
       }
     } catch (e) {
       loadAllData(data)
@@ -385,7 +417,7 @@
     var data = JSON.parse(await API.load())
     try {
       data.splice(data.indexOf(data.find((e) => e.name == name)), 1)
-      API.save(JSON.stringify(data))
+      await API.save(JSON.stringify(data))
       loadAllData(data)
       loadAllData(JSON.parse(await API.load()))
     } catch (e) {
