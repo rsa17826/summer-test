@@ -6,6 +6,7 @@
 
 <script src="./cryptojs.js"></script>
 <script src="./protectedtextapi.js"></script>
+<script src="./jsonblobapi.js"></script>
 
 <link rel="stylesheet" href="style.css" />
 <span class="installlinks">
@@ -44,10 +45,11 @@
   }, 100)
   async function start() {
     a.qs(".installlinks").classList.add("hide")
-    const API = (window.API = await new protectedtextapi(
-      "summerplans",
-      "summertest"
-    ))
+    const API = (window.API = await new jsonblobapi("1352826891148648448"))
+    // const API = (window.API = await new protectedtextapi(
+    //   "summerplans",
+    //   "summertest"
+    // ))
     var data = JSON.parse(await API.load())
     await a.bodyload()
     loadAllData(data)

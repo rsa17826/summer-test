@@ -107,3 +107,4 @@ class protectedtextapi {
           this.dbversion
   }
 }
+

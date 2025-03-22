@@ -29,8 +29,6 @@
 body,
 html {
   background-color: var(--space-cadet);
-  width: 500vw;
-  height: 500vh;
 }
 button,
 input {
