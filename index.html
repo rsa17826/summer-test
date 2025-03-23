@@ -27,7 +27,7 @@
 />
 <input type="checkbox" name="notification" id="notification" />
 <label for="notification">notify on data change</label>
-<br>
+<br />
 <span>left click for yes, right click for no</span>
 <div id="sticky">
   <input
@@ -202,6 +202,12 @@
                   maxWidth: "190px",
                   minWidth: "40px",
                   class: "taskname",
+                  onfocus() {
+                    window.intextarea = true
+                  },
+                  onblur() {
+                    window.intextarea = false
+                  },
                   onchange(e) {
                     renameEvent(this.oldname, this.value)
                   },
@@ -277,6 +283,12 @@
                 autocomplete: "off",
                 class: "desc",
                 onchange: updateDesc,
+                onfocus() {
+                  window.intextarea = true
+                },
+                onblur() {
+                  window.intextarea = false
+                },
               }),
             ]),
           ]
@@ -328,7 +340,9 @@
   }
 
   async function like(thing, liked) {
+    log("loading like")
     var data = JSON.parse(await API.load())
+    log("done loading like")
     try {
       data
         .find((e) => e.name == thing)
@@ -352,9 +366,12 @@
   async function updateDesc(event) {
     event.preventDefault()
     try {
+      log("loading desc")
       var data = JSON.parse(await API.load())
+      log("done loading desc")
       var thing = data.find((e) => e.name == event.target.thingname)
       thing.desc = event.target.value
+      loadAllData(data)
       await API.save(JSON.stringify(data))
       loadAllData(data)
     } catch (e) {}
