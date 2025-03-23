@@ -3026,5 +3026,56 @@
       return end()
     }
   )
+  a.download = newfunc(
+    function download(
+      data, //string|file|blob
+      filename = "temp.txt", //string|undefined
+      type = "text/plain", //string|undefined
+      isurl = false //boolean|undefined
+    ) {
+      var url
+      if (isurl) {
+        url = data
+      } else {
+        if (a.gettype(data, "string"))
+          var file = new Blob([data], {
+            type,
+          })
+        else if (a.gettype(data, ["file", "blob"])) {
+          filename = data.name
+          var file = data
+        }
+        url = URL.createObjectURL(file)
+      }
+      var link = document.createElement("a")
+
+      link.href = url
+      link.download = filename
+      a.bodyload().then(() => {
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        if (!isurl) URL.revokeObjectURL(url)
+      })
+    },
+    function ({
+      ifunset,
+      gettype,
+      end,
+      maketype,
+      makeenum,
+      trymaketype,
+      trymakeenum,
+      trygettype,
+      args: [data, filename, type, isurl],
+    }) {
+      ifunset(undefined, "temp.txt", "text/plain", false)
+      data = maketype(data, ["string", "blob", "file"])
+      filename = maketype(filename, ["string", "undefined"])
+      type = maketype(type, ["string", "undefined"])
+      isurl = maketype(isurl, ["boolean", "undefined"])
+      return end()
+    }
+  )
   loadlib("libloader").savelib("allfuncs", a)
 })()
