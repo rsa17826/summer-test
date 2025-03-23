@@ -8,16 +8,23 @@ class jsonblobapi {
     if (this.t) {
       clearTimeout(this.t)
     }
-    this.t = setTimeout(async () => {
-      var data = await API.load()
-      if (data !== window.lastdata) {
-        loadAllData(JSON.parse(data))
-        window.lastdata = data
-        if (localStorage.sendnoti == "true") {
-          sendnoti()
+    this.t = setTimeout(
+      (async () => {
+        if (window.intextarea) {
+          this.resetTimer()
+          return
         }
-      }
-    }, 5 * 60 * 1000)
+        var data = await API.load()
+        if (data !== window.lastdata) {
+          loadAllData(JSON.parse(data))
+          window.lastdata = data
+          if (localStorage.sendnoti == "true") {
+            sendnoti()
+          }
+        }
+      }).bind(this),
+      5 * 60 * 1000
+    )
   }
   async load() {
     if (this.saving.length) await this.__notSaving()
