@@ -15,9 +15,10 @@ class jsonblobapi {
           return
         }
         var data = await API.load()
+        log(data, window.lastdata)
         if (data !== window.lastdata) {
-          loadAllData(JSON.parse(data))
           window.lastdata = data
+          loadAllData(JSON.parse(data))
           if (localStorage.sendnoti == "true") {
             sendnoti()
           }

@@ -160,8 +160,7 @@
     //   "summerplans",
     //   "summertest"
     // ))
-    var data = JSON.parse(await API.load())
-    window.lastdata = data
+    var data = JSON.parse((window.lastdata = await API.load()))
     await a.bodyload()
     loadAllData(data)
   }
