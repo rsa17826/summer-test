@@ -23,7 +23,7 @@ class jsonblobapi {
           }
         }
       }).bind(this),
-      5 * 60 * 1000
+      1 * 60 * 1000
     )
   }
   async load() {
