@@ -155,7 +155,7 @@
     setInterval(async () => {
       var data = await API.load()
       if (data !== window.lastdata) {
-        loadAllData(JSon.parse(data))
+        loadAllData(JSON.parse(data))
         window.lastdata = data
         if (localStorage.sendnoti == "true") {
           sendnoti()
