@@ -152,16 +152,6 @@
     }
   }
   async function start() {
-    setInterval(async () => {
-      var data = await API.load()
-      if (data !== window.lastdata) {
-        loadAllData(JSON.parse(data))
-        window.lastdata = data
-        if (localStorage.sendnoti == "true") {
-          sendnoti()
-        }
-      }
-    }, 5 * 60 * 1000)
     a.qs(".installlinks").classList.add("hide")
     const API = (window.API = await new jsonblobapi(
       "1352826891148648448"

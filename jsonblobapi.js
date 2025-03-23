@@ -2,9 +2,26 @@ class jsonblobapi {
   constructor(id) {
     this.saving = []
     this.url = `https://jsonblob.com/api/jsonBlob/${id}`
+    this.resetTimer()
+  }
+  resetTimer() {
+    if (this.t) {
+      clearTimeout(this.t)
+    }
+    this.t = setTimeout(async () => {
+      var data = await API.load()
+      if (data !== window.lastdata) {
+        loadAllData(JSON.parse(data))
+        window.lastdata = data
+        if (localStorage.sendnoti == "true") {
+          sendnoti()
+        }
+      }
+    }, 5 * 60 * 1000)
   }
   async load() {
     if (this.saving.length) await this.__notSaving()
+    this.resetTimer()
     this.saving.push(1)
     var x = (await globalrequest(this.url)).text
     this.saving.pop()
@@ -31,6 +48,7 @@ class jsonblobapi {
   }
   async save(data) {
     if (this.saving.length) await this.__notSaving()
+    this.resetTimer()
     this.saving.push(1)
     log(
       await globalrequest({
