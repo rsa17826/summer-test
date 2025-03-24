@@ -39,6 +39,7 @@
     active = { html: 1, css: 1, js: 1 }
 
   var Live = {
+    sentmsg: false,
     // performs a cycle per interval
     heartbeat: function () {
       if (document.body) {
@@ -199,15 +200,17 @@
         case "application/javascript":
         case "application/x-javascript":
           if (location.href.includes(".github.io/")) {
-            return toast(
-              "Page Update Available, reload to update",
-              "yellow",
-              Infinity
-            )
+            if (!Live.sentmsg)
+              toast(
+                "Page Update Available, reload to update",
+                "yellow",
+                Infinity
+              )
+            Live.sentmsg = true
           } else document.location.reload()
       }
     },
-    
+
     // removes the old stylesheet rules only once the new one has finished loading
     removeoldLinkElements: function () {
       var pending = 0
