@@ -57,6 +57,7 @@ class jsonblobapi {
     if (this.saving) await this.__notSaving()
     this.resetTimer()
     this.saving++
+    await tryLocalSave(data)
     log(
       await globalrequest({
         url: this.url,
@@ -69,7 +70,6 @@ class jsonblobapi {
       })
     )
     this.saving--
-    tryLocalSave(data)
     if (data !== (await this.load(true))) {
       toast("not saved", "red")
       a.download(data, "summer test backup.json")
