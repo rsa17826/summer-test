@@ -44,11 +44,8 @@ class jsonblobapi {
     return new Promise((resolve, reject) => {
       var int = setInterval(
         (() => {
-          // debugger
-          // log(this.saving)
           if (!this.saving) {
             clearInterval(int)
-            // setTimeout(resolve, 1000)
             resolve()
           }
         }).bind(this)
