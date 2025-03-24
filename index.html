@@ -79,7 +79,7 @@
     var toastbox = a.createelem(document.body, "div", {
       id: "toastbox",
     })
-    function toast(msg, color) {
+    function toast(msg, color, time = 2800) {
       var x = a.createelem(toastbox, "div", {
         class: "toast",
         backgroundColor:
@@ -89,8 +89,24 @@
             green: "rgb(127, 255, 138)",
           }[color] ?? color,
         innerHTML: msg,
+        textAlign: "center",
+        lineHeight: "40px",
+        height: "40px",
+        padding: "10px",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: "20px",
+        minWidth: "200px",
+        color: "#000",
+        opacity: 1,
+        animation: "fade 0.5s 1",
+        animationFillMode: "forwards",
+        animationDelay:
+          time == Infinity ? "1000s" : Math.floor(time / 1000) + "s",
       })
-      setTimeout(((x) => x?.remove?.()).bind(null, x), 2800)
+      if (time !== Infinity)
+        setTimeout(((x) => x?.remove?.()).bind(null, x), time)
       return x
     }
     loadlib("libloader").savelib("toast", toast)
@@ -111,21 +127,6 @@
       font-size: large;
       font-weight: 150;
       pointer-events: none;
-    }
-
-    .toast {
-      text-align: center;
-      line-height: 40px;
-      height: 40px;
-      padding: 10px;
-      display:flex;justify-content:center;align-items:center;
-      border-radius: 20px;
-      min-width: 200px;
-      color: #000;
-      opacity: 1;
-      animation: fade 0.5s 1;
-      animation-fill-mode: forwards;
-      animation-delay: 2s;
     }
     @keyframes fade {
       0% {

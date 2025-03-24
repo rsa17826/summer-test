@@ -21,9 +21,9 @@
   To monitor CSS and be notified that it has loaded, include it as: live.js#css,notify
 */
 ;(function () {
-  if (location.href.includes(".github.io/")) {
-    return
-  }
+  // if (location.href.includes(".github.io/")) {
+  //   return
+  // }
   var headers = {
       Etag: 1,
       "Last-Modified": 1,
@@ -198,7 +198,13 @@
         case "text/javascript":
         case "application/javascript":
         case "application/x-javascript":
-          document.location.reload()
+          if (location.href.includes(".github.io/")) {
+            return toast(
+              "Page Update Available, reload to update",
+              "yellow",
+              Infinity
+            )
+          } else document.location.reload()
       }
     },
 
