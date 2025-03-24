@@ -123,7 +123,7 @@
     }`,
     })
   })()
-
+  window.filter = {}
   async function tryLocalSave(data, extra = "") {
     if (localStorage.createLocalBackups == "true") {
       try {
@@ -450,6 +450,7 @@
     while (children.length > data.length) {
       children.pop().remove()
     }
+    applyFilter()
   }
 
   async function updateDesc(event) {
@@ -545,6 +546,42 @@
       loadAllData(JSON.parse(await API.load()))
     } catch (e) {
       loadAllData(data)
+    }
+  }
+
+  function applyFilter() {
+    const { likeStatus, validPlayerCount, inTitle } = window.filter
+    var things = a.qsa("#table > tbody > tr")
+    for (var thing of things) {
+      thing.classList.remove("hide")
+      var you = a
+        .qsa("td:nth-child(3) > div", thing)
+        .find((e) => e.textContent == localStorage.name)
+      if (likeStatus && !you.classList.contains(likeStatus)) {
+        thing.classList.add("hide")
+        continue
+      }
+      var playerCounts = a
+        .qsa("td:nth-child(2) > div", thing)
+        .filter((e) => e.classList.contains("valid"))
+        .map((e) => e.textContent.trim())
+      if (
+        validPlayerCount &&
+        !playerCounts.includes(String(validPlayerCount))
+      ) {
+        thing.classList.add("hide")
+        continue
+      }
+      if (
+        inTitle &&
+        !a
+          .qs("td:first-child > input", thing)
+          .value.toLowerCase()
+          .includes(inTitle.toLowerCase())
+      ) {
+        thing.classList.add("hide")
+        continue
+      }
     }
   }
 </script>
