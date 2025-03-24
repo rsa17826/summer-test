@@ -18,6 +18,8 @@ class jsonblobapi {
         log(data, window.lastdata)
         if (data !== window.lastdata) {
           window.lastdata = data
+          tryLocalSave(lastdata, "prev")
+          tryLocalSave(data, "new")
           loadAllData(JSON.parse(data))
           if (localStorage.sendnoti == "true") {
             sendnoti()
@@ -52,7 +54,6 @@ class jsonblobapi {
     })
   }
   async save(data) {
-    debugger
     if (this.saving) await this.__notSaving()
     this.resetTimer()
     this.saving++
@@ -67,12 +68,14 @@ class jsonblobapi {
         body: data,
       })
     )
-    // if (data == (await this.load(true))) {
-    //   alert("saved")
-    // } else {
-    //   alert("not saved")
-    // }
     this.saving--
+    tryLocalSave(data)
+    if (data !== (await this.load(true))) {
+      toast("not saved", "red")
+      a.download(data, "summer test backup.json")
+    } else {
+      toast("saved!", "green")
+    }
     return
   }
 }
