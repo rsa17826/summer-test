@@ -150,7 +150,9 @@
           ".json",
         data
       )
+      return 1
     }
+    return 0
     async function saveToFile(handle, name, data) {
       const fileHandle = await handle.getFileHandle(name, {
         create: true,
