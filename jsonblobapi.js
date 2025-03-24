@@ -15,8 +15,8 @@ class jsonblobapi {
           return
         }
         var data = await API.load(true)
-        log(data, window.lastdata)
         if (data !== window.lastdata) {
+          log("DATA CHANGED")
           window.lastdata = data
           tryLocalSave(lastdata, "prev")
           tryLocalSave(data, "new")
@@ -24,7 +24,7 @@ class jsonblobapi {
           if (localStorage.sendnoti == "true") {
             sendnoti()
           }
-        }
+        } else log("no data changed")
       }).bind(this),
       1 * 60 * 1000
     )

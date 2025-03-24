@@ -1,4 +1,4 @@
-<script src="./js globals/live.js"></script>
+﻿<script src="./js globals/live.js"></script>
 <script src="./js globals/libloader.user.js"></script>
 <script src="./js globals/allfuncs.user.js"></script>
 <script src="./js globals/better logs.user.js"></script>
@@ -128,10 +128,10 @@
     if (localStorage.createLocalBackups == "true") {
       try {
         ls.folder ??= await a.getfolder(true)
-        saveToFile(
+        await saveToFile(
           ls.folder,
           "AUTO summer test backup - " +
-            Date.now() +
+            getFormattedDateTime() +
             (extra ? " - " + extra : "") +
             ".json",
           data
@@ -143,6 +143,19 @@
       }
     }
     return 0
+    function getFormattedDateTime() {
+      const date = new Date()
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, "0")
+      const day = String(date.getDate()).padStart(2, "0")
+      const hours = String(date.getHours()).padStart(2, "0")
+      const minutes = String(date.getMinutes()).padStart(2, "0")
+      const seconds = String(date.getSeconds()).padStart(2, "0")
+
+      // return `${month} ${day} ${year}_${hours}h${minutes}m${seconds}s`
+      return `${month} ${day} - ${year}_${hours}\uFF1A${minutes} - ${seconds}`
+    }
+
     async function saveToFile(handle, name, data) {
       const fileHandle = await handle.getFileHandle(name, {
         create: true,
@@ -212,6 +225,7 @@
       }
 
       xhr.onerror = function () {
+        toast("Network Error", "red")
         reject(new Error("Network Error"))
       }
 

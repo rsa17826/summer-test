@@ -102,7 +102,7 @@ textarea.desc {
   z-index: 11;
   box-sizing: border-box;
 }
-@media screen and (max-width: 555px) {
+@media screen and (max-width: 840px) {
   #sticky.scrolled {
     top: 46px;
   }
