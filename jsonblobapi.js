@@ -38,7 +38,6 @@ class jsonblobapi {
   }
   async __notSaving() {
     if (!this.saving) {
-      // log(this.saving)
       return
     }
     return new Promise((resolve, reject) => {

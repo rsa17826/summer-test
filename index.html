@@ -88,29 +88,23 @@
 
       xhr.open(method, url, true)
 
-      // Set request headers
       for (const key in headers) {
         xhr.setRequestHeader(key, headers[key])
       }
 
-      // Set up the callback for when the request completes
       xhr.onload = function () {
         if (xhr.status >= 200 && xhr.status < 300) {
-          // Resolve the promise with the response data
           resolve({ text: xhr.responseText })
         } else {
-          // Reject the promise with the status text
           error(xhr.statusText, xhr.responseText)
           reject(new Error(xhr.responseText))
         }
       }
 
-      // Handle network errors
       xhr.onerror = function () {
         reject(new Error("Network Error"))
       }
 
-      // Send the request with the data
       xhr.send(data.body ? data.body : undefined)
     })
   }
@@ -134,17 +128,11 @@
   }
   function sendnoti() {
     if (!("Notification" in window)) {
-      // Check if the browser supports notifications
       alert("This browser does not support desktop notification")
     } else if (Notification.permission === "granted") {
-      // Check whether notification permissions have already been granted;
-      // if so, create a notification
       const notification = new Notification("data updated!")
-      // …
     } else if (Notification.permission !== "denied") {
-      // We need to ask the user for permission
       Notification.requestPermission().then((permission) => {
-        // If the user accepts, let's create a notification
         if (permission === "granted") {
           const notification = new Notification("data updated!")
         }
@@ -246,7 +234,6 @@
             a.newelem(
               "td",
               {
-                // justifyContent: "space-between",
                 gap: "2px",
               },
               likes.map((e) =>
@@ -283,7 +270,6 @@
           ]
         )
       )
-    // else {
     var child = [...table.children][idx]
     a.qs("tr>td>button#delete", child).thingname =
       a.qs("tr>td>input", child).oldname =
@@ -325,7 +311,6 @@
     var descElem = a.qs("tr>td:nth-of-type(4)>textarea.desc", child)
     descElem.value = desc
     descElem.thingname = name
-    // }
   }
 
   async function like(thing, liked) {
