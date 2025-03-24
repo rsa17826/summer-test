@@ -1,6 +1,6 @@
 class jsonblobapi {
   constructor(id) {
-    this.saving = []
+    this.saving = 0
     this.url = `https://jsonblob.com/api/jsonBlob/${id}`
     this.resetTimer()
   }
@@ -14,7 +14,7 @@ class jsonblobapi {
           this.resetTimer()
           return
         }
-        var data = await API.load()
+        var data = await API.load(true)
         log(data, window.lastdata)
         if (data !== window.lastdata) {
           window.lastdata = data
@@ -27,16 +27,17 @@ class jsonblobapi {
       1 * 60 * 1000
     )
   }
-  async load() {
-    if (this.saving.length) await this.__notSaving()
+  async load(dontsave) {
+    if (this.saving) await this.__notSaving()
     this.resetTimer()
-    this.saving.push(1)
+    this.saving++
     var x = (await globalrequest(this.url)).text
-    this.saving.pop()
+    if (!dontsave) window.lastdata = x
+    this.saving--
     return x
   }
   async __notSaving() {
-    if (!this.saving.length) {
+    if (!this.saving) {
       // log(this.saving)
       return
     }
@@ -45,7 +46,7 @@ class jsonblobapi {
         (() => {
           // debugger
           // log(this.saving)
-          if (!this.saving.length) {
+          if (!this.saving) {
             clearInterval(int)
             // setTimeout(resolve, 1000)
             resolve()
@@ -55,9 +56,9 @@ class jsonblobapi {
     })
   }
   async save(data) {
-    if (this.saving.length) await this.__notSaving()
+    if (this.saving) await this.__notSaving()
     this.resetTimer()
-    this.saving.push(1)
+    this.saving++
     log(
       await globalrequest({
         url: this.url,
@@ -69,7 +70,7 @@ class jsonblobapi {
         body: data,
       })
     )
-    this.saving.pop()
+    this.saving--
     return
   }
 }
