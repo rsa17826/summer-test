@@ -52,6 +52,7 @@ class jsonblobapi {
     })
   }
   async save(data) {
+    debugger
     if (this.saving) await this.__notSaving()
     this.resetTimer()
     this.saving++
@@ -66,11 +67,11 @@ class jsonblobapi {
         body: data,
       })
     )
-    if (data == (await this.load(true))) {
-      alert("saved")
-    } else {
-      alert("not saved")
-    }
+    // if (data == (await this.load(true))) {
+    //   alert("saved")
+    // } else {
+    //   alert("not saved")
+    // }
     this.saving--
     return
   }
