@@ -207,7 +207,7 @@
           } else document.location.reload()
       }
     },
-
+    
     // removes the old stylesheet rules only once the new one has finished loading
     removeoldLinkElements: function () {
       var pending = 0
