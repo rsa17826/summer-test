@@ -66,6 +66,11 @@ class jsonblobapi {
         body: data,
       })
     )
+    if (data == (await this.load(true))) {
+      alert("saved")
+    } else {
+      alert("not saved")
+    }
     this.saving--
     return
   }
