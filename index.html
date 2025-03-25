@@ -264,6 +264,12 @@
     }
   }
   async function start() {
+    try {
+      await verifyPermission(frame.file || frame.folder)
+    } catch (e) {
+      await waitForClick()
+      await verifyPermission(frame.file || frame.folder)
+    }
     await loadlib("libloader").waitforlib("toast")
     const toast = loadlib("toast")
     window.toast = toast
@@ -597,5 +603,18 @@
         continue
       }
     }
+  }
+  async function verifyPermission(fileHandle, write) {
+    const options = {}
+    if (write) {
+      options.mode = "readwrite"
+    }
+    if (
+      (await fileHandle.queryPermission(options)) === "granted" ||
+      (await fileHandle.requestPermission(options)) === "granted"
+    ) {
+      return true
+    }
+    return false
   }
 </script>
