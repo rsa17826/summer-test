@@ -617,4 +617,10 @@
     }
     return false
   }
+  function waitForClick() {
+    return new Promise((resolve) => {
+      window.onclick = resolve
+      delete window.onclick
+    })
+  }
 </script>
