@@ -264,12 +264,13 @@
     }
   }
   async function start() {
-    try {
-      await verifyPermission(frame.file || frame.folder)
-    } catch (e) {
-      await waitForClick()
-      await verifyPermission(frame.file || frame.folder)
-    }
+    if (ls.folder)
+      try {
+        await verifyPermission(ls.folder)
+      } catch (e) {
+        await waitForClick()
+        await verifyPermission(ls.folder)
+      }
     await loadlib("libloader").waitforlib("toast")
     const toast = loadlib("toast")
     window.toast = toast
