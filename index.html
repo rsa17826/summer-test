@@ -264,6 +264,11 @@
     }
   }
   async function start() {
+    await loadlib("libloader").waitforlib("toast")
+    const toast = loadlib("toast")
+    window.toast = toast
+    const ls = await loadlib("indexeddb ls")("summer test")
+    window.ls ??= ls
     if (ls.folder)
       try {
         await verifyPermission(ls.folder)
@@ -271,11 +276,6 @@
         await waitForClick()
         await verifyPermission(ls.folder)
       }
-    await loadlib("libloader").waitforlib("toast")
-    const toast = loadlib("toast")
-    window.toast = toast
-    const ls = await loadlib("indexeddb ls")("summer test")
-    window.ls ??= ls
     a.qs(".installlinks").classList.add("hide")
     const API = (window.API = await new jsonblobapi(
       "1352826891148648448"
