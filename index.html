@@ -271,10 +271,10 @@
     window.ls ??= ls
     if (ls.folder)
       try {
-        await verifyPermission(ls.folder)
+        await verifyPermission(ls.folder, true)
       } catch (e) {
         await waitForClick()
-        await verifyPermission(ls.folder)
+        await verifyPermission(ls.folder, true)
       }
     a.qs(".installlinks").classList.add("hide")
     const API = (window.API = await new jsonblobapi(
