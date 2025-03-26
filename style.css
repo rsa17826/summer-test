@@ -101,13 +101,15 @@ textarea.desc {
   top: 29px;
   z-index: 11;
   box-sizing: border-box;
+  background-color: var(--dark-purple);
+  width: fit-content;
 }
 @media screen and (max-width: 840px) {
   #sticky.scrolled {
     top: 46px;
   }
 }
-.taskname{
+.taskname {
   background-color: #0000;
   border: none;
 }

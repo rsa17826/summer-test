@@ -11,14 +11,14 @@
 <script src="./jsonblobapi.js"></script>
 
 <link rel="stylesheet" href="style.css" />
-<span class="installlinks">
+<!-- <span class="installlinks">
   <a
     href="https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag"
     target="_blank"
     >violentmonkey</a
   >
   <a href="./globalrequest.user.js" target="_self">globalrequest</a>
-</span>
+</span> -->
 <button id="download">download</button>
 <input
   type="text"
@@ -265,20 +265,20 @@
   if (window.globalrequest) {
     start()
   } else {
-    var timeout = setTimeout(() => {
-      if (!window.globalrequest) {
-        alert(
-          "click the link for violentmonkey, install the extension then click globalrequest and install that too"
-        )
-      }
-    }, 4000)
-    var interval = setInterval(() => {
-      if (window.globalrequest) {
-        clearTimeout(timeout)
-        clearInterval(interval)
-        start()
-      }
-    }, 100)
+    // var timeout = setTimeout(() => {
+    //   if (!window.globalrequest) {
+    //     alert(
+    //       "click the link for violentmonkey, install the extension then click globalrequest and install that too"
+    //     )
+    //   }
+    // }, 4000)
+    // var interval = setInterval(() => {
+    //   if (window.globalrequest) {
+    //     clearTimeout(timeout)
+    //     clearInterval(interval)
+    //     start()
+    //   }
+    // }, 100)
   }
   function sendnoti() {
     if (!("Notification" in window)) {
@@ -299,7 +299,7 @@
     window.toast = toast
     const ls = await loadlib("indexeddb ls")("summer test")
     window.ls ??= ls
-    a.qs(".installlinks").classList.add("hide")
+    // a.qs(".installlinks").classList.add("hide")
     const API = (window.API = await new jsonblobapi(
       "1352826891148648448"
     ))
