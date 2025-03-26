@@ -44,6 +44,24 @@
     placeholder="name of new task"
   />
   <button id="addtask">add task</button>
+  <span id="count">loading...</span>
+  <select name="filter" id="filter">
+    <option value="clearAll">clear all filters</option>
+    <optgroup label="valid player counts">
+      <option value="players:any">any</option>
+      <option value="players:1">1</option>
+      <option value="players:2">2</option>
+      <option value="players:3">3</option>
+      <option value="players:4">4</option>
+      <option value="players:5">5</option>
+    </optgroup>
+    <optgroup label="liked state">
+      <option value="like:any">any</option>
+      <option value="like:liked">yes</option>
+      <option value="like:likable">unset</option>
+      <option value="like:disliked">no</option>
+    </optgroup>
+  </select>
 </div>
 <table id="table">
   <thead>
@@ -166,10 +184,8 @@
     }
   }
 
-  // add my ideas
   // add way to filter by users liked/disliked/likable
   // add way to filter by valid player counts
-  // add reload button/polling reload
   const a = loadlib("allfuncs")
 
   a.listen(window, "scroll", function () {
@@ -190,6 +206,20 @@
     localStorage.createLocalBackups = String(
       a.qs("#createLocalBackups").checked
     )
+  })
+  a.listen(a.qs("#filter"), "change", (e) => {
+    var val = a.qs("#filter").value
+    if (val == "clearAll") {
+      window.filter = {}
+    } else if (val.startsWith("players:")) {
+      if (val == "players:any") delete window.filter.validPlayerCount
+      else
+        window.filter.validPlayerCount = val.replace("players:", "")
+    } else if (val.startsWith("like:")) {
+      if (val == "like:any") delete window.filter.likeStatus
+      else window.filter.likeStatus = val.replace("like:", "")
+    }
+    applyFilter()
   })
   a.listen(a.qs("#download"), "click", async (e) => {
     a.download(await API.load(), "summer test backup - " + Date.now())
@@ -274,7 +304,7 @@
       "1352826891148648448"
     ))
     // const API = (window.API = await new protectedtextapi(
-      //   "summerplans",
+    //   "summerplans",
     //   "summertest"
     // ))
     var data = JSON.parse((window.lastdata = await API.load()))
@@ -450,9 +480,7 @@
   }
 
   async function like(thing, liked) {
-    log("loading like")
     var data = JSON.parse(await API.load())
-    log("done loading like")
     try {
       data
         .find((e) => e.name == thing)
@@ -571,15 +599,23 @@
   }
 
   function applyFilter() {
+    if (!window.filter) return
     const { likeStatus, validPlayerCount, inTitle } = window.filter
     var things = a.qsa("#table > tbody > tr")
+    var hiden = 0
     for (var thing of things) {
       thing.classList.remove("hide")
       var you = a
         .qsa("td:nth-child(3) > div", thing)
         .find((e) => e.textContent == localStorage.name)
+      if (!you) {
+        error("invalid name set!")
+        window.filter = null
+        return
+      }
       if (likeStatus && !you.classList.contains(likeStatus)) {
         thing.classList.add("hide")
+        hiden++
         continue
       }
       var playerCounts = a
@@ -591,6 +627,7 @@
         !playerCounts.includes(String(validPlayerCount))
       ) {
         thing.classList.add("hide")
+        hiden++
         continue
       }
       if (
@@ -601,9 +638,13 @@
           .includes(inTitle.toLowerCase())
       ) {
         thing.classList.add("hide")
+        hiden++
         continue
       }
     }
+    a.qs("#count").textContent = hiden
+      ? `${things.length - hiden} - ${hiden} = ${things.length}`
+      : `total: ${things.length}`
   }
   async function verifyPermission(fileHandle, write) {
     const options = {}
