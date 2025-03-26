@@ -269,6 +269,17 @@
     window.toast = toast
     const ls = await loadlib("indexeddb ls")("summer test")
     window.ls ??= ls
+    a.qs(".installlinks").classList.add("hide")
+    const API = (window.API = await new jsonblobapi(
+      "1352826891148648448"
+    ))
+    // const API = (window.API = await new protectedtextapi(
+      //   "summerplans",
+    //   "summertest"
+    // ))
+    var data = JSON.parse((window.lastdata = await API.load()))
+    await a.bodyload()
+    loadAllData(data)
     if (ls.folder)
       try {
         await verifyPermission(ls.folder, true)
@@ -276,17 +287,6 @@
         await waitForClick()
         await verifyPermission(ls.folder, true)
       }
-    a.qs(".installlinks").classList.add("hide")
-    const API = (window.API = await new jsonblobapi(
-      "1352826891148648448"
-    ))
-    // const API = (window.API = await new protectedtextapi(
-    //   "summerplans",
-    //   "summertest"
-    // ))
-    var data = JSON.parse((window.lastdata = await API.load()))
-    await a.bodyload()
-    loadAllData(data)
   }
   function loaddata(idx, data) {
     const table = a.qs("#table>tbody")
