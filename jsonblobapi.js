@@ -33,7 +33,12 @@ class jsonblobapi {
     if (this.saving) await this.__notSaving()
     this.resetTimer()
     this.saving++
-    var x = (await globalrequest(this.url)).text
+    try {
+      var x = (await globalrequest(this.url)).text
+    } catch (e) {
+      error(e)
+      toast("network error: failed to load", "red")
+    }
     if (!dontsave) window.lastdata = x
     this.saving--
     return x
@@ -58,7 +63,7 @@ class jsonblobapi {
     this.resetTimer()
     this.saving++
     await tryLocalSave(data)
-    log(
+    try {
       await globalrequest({
         url: this.url,
         method: "PUT",
@@ -68,7 +73,10 @@ class jsonblobapi {
         },
         body: data,
       })
-    )
+    } catch (e) {
+      error(e)
+      toast("network error: failed to save", "red")
+    }
     this.saving--
     if (data !== (await this.load(true))) {
       toast("not saved", "red")

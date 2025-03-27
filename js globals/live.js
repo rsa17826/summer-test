@@ -142,6 +142,13 @@
             }
             // if changed, act
             if (hasChanged) {
+              if (!newValue && !contentType) {
+                if (window.toast) {
+                  window.toast("offline", "red")
+                }
+                console.error("offline")
+                return
+              }
               Live.refreshResource(url, contentType)
               break
             }
