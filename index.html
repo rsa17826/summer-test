@@ -222,7 +222,17 @@
     applyFilter()
   })
   a.listen(a.qs("#download"), "click", async (e) => {
-    a.download(await API.load(), "summer test backup - " + Date.now())
+    tryLocalSave(window.lastdata, "LOCAL UNSAVED")
+    a.download(
+      window.lastdata,
+      "LOCAL UNSAVED - summer test backup - " + Date.now()
+    )
+    var newdata = await API.load()
+    tryLocalSave(newdata, "LAST SAVED")
+    a.download(
+      newdata,
+      "LAST SAVED - summer test backup - " + Date.now()
+    )
   })
   a.qs("#username").value = localStorage.name ?? ""
   a.listen(a.qs("#username"), "change", () => {
