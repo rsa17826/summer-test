@@ -209,6 +209,7 @@
   })
   a.listen(a.qs("#filter"), "change", (e) => {
     var val = a.qs("#filter").value
+    window.filter ??= {}
     if (val == "clearAll") {
       window.filter = {}
     } else if (val.startsWith("players:")) {
@@ -225,13 +226,13 @@
     tryLocalSave(window.lastdata, "LOCAL UNSAVED")
     a.download(
       window.lastdata,
-      "LOCAL UNSAVED - summer test backup - " + Date.now()
+      "LOCAL UNSAVED - summer test backup - " + Date.now() + ".json"
     )
     var newdata = await API.load()
     tryLocalSave(newdata, "LAST SAVED")
     a.download(
       newdata,
-      "LAST SAVED - summer test backup - " + Date.now()
+      "LAST SAVED - summer test backup - " + Date.now() + ".json"
     )
   })
   a.qs("#username").value = localStorage.name ?? ""
