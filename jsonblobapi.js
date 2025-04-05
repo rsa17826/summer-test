@@ -14,7 +14,7 @@ class jsonblobapi {
           this.resetTimer()
           return
         }
-        var data = await API.load(true)
+        var data = await this.load(true)
         if (data !== window.lastdata) {
           log("DATA CHANGED")
           window.lastdata = data

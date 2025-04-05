@@ -3,6 +3,8 @@
 <script src="./js globals/allfuncs.user.js"></script>
 <script src="./js globals/better logs.user.js"></script>
 <script src="./js globals/indexeddb ls.user.js"></script>
+<script src="./marked.js"></script>
+<script src="./decensor.js"></script>
 
 <!-- <script src="./eruda.js"></script> -->
 
@@ -67,9 +69,10 @@
   <thead>
     <tr style="position: sticky">
       <th>name</th>
-      <th>PLAYER COUNT</th>
+      <th>player count</th>
       <th>likes</th>
       <th>description</th>
+      <th>comments</th>
     </tr>
   </thead>
   <tbody></tbody>
@@ -253,8 +256,10 @@
     })
     a.listen(a.qs("#addtask"), "click", () => {
       addNewEvent(a.qs("#taskname").value)
+      a.qs("#taskname").value = ""
     })
   }
+
   window.globalrequest = (data) => {
     if (typeof data == "string") data = { url: data }
     var { url, method, headers } = data
@@ -462,6 +467,27 @@
                 },
               }),
             ]),
+            a.newelem("td", {}, [
+              a.newelem("div", {
+                textOverflow: "ellipsis",
+                maxHeight: "100px",
+                overflow: "scroll",
+                whiteSpace: "nowrap",
+                id: "comments",
+              }),
+              a.newelem("input", {
+                autocomplete: "off",
+                class: "comment",
+                onchange: addComment,
+                width: "300px",
+                onfocus() {
+                  window.intextarea = true
+                },
+                onblur() {
+                  window.intextarea = false
+                },
+              }),
+            ]),
           ]
         )
       )
@@ -506,6 +532,54 @@
     var descElem = a.qs("tr>td:nth-of-type(4)>textarea.desc", child)
     descElem.value = desc
     descElem.thingname = name
+
+    var commentElem = a.qs(
+      "tr>td:nth-of-type(5)>input.comment",
+      child
+    )
+    commentElem.thingname = name
+    var commentsElem = a.qs("tr>td:nth-of-type(5)>#comments", child)
+    commentsElem.innerHTML = (data.comments || [])
+      .map(
+        (e) =>
+          a.newelem(
+            "div",
+            {
+              textAlign: (self = e.username == localStorage.name)
+                ? "right"
+                : "left",
+              width: "300px",
+              marginTop: "5px",
+            },
+            [
+              a.newelem("span", {
+                maxWidth: "275px",
+                overflow: "wrap",
+                display: "inline-block",
+                display: "inline-block",
+                whiteSpace: "normal",
+                textOverflow: "wrap",
+                overflowWrap: "break-word",
+                wordWrap: "break-word",
+                borderRadius: "10px",
+                backgroundColor: self ? "green" : "blue",
+                padding: "2px",
+                paddingRight: "5px",
+                paddingLeft: "5px",
+                innerHTML: marked
+                  .parse(
+                    decensor(
+                      (self ? "" : `${e.username}:\n`) +
+                        e.comment.trim().replace(/[^\x20-\x7E]/g, "")
+                    )
+                  )
+                  .replace(/<(\/?)p>/g, "<$1span>"),
+              }),
+            ]
+          ).outerHTML
+      )
+      .join("\n")
+    commentsElem.scrollTop = commentsElem.scrollHeight
   }
 
   // data saving funcs
@@ -717,6 +791,33 @@
         }
       })
     }
+  }
+
+  async function addComment(event) {
+    var text = event.target.value
+    if (!localStorage.name) {
+      alert("enter username to add comment")
+      return
+    }
+    startSaving()
+    try {
+      var data = JSON.parse(await API.load())
+      var thing = data.find((e) => e.name == event.target.thingname)
+      log(data, thing, event.target.thingname)
+      thing.comments ??= []
+      thing.comments.push({
+        comment: text,
+        date: new Date().toLocaleString(),
+        username: localStorage.name,
+      })
+      loadAllData(data)
+      await API.save(JSON.stringify(data))
+      loadAllData(data)
+      event.target.value = ""
+    } catch (e) {
+      error("addComment", e)
+    }
+    stopSaving()
   }
 
   // save prompt
