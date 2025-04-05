@@ -9,7 +9,7 @@
 <script src="./cryptojs.js"></script>
 <script src="./protectedtextapi.js"></script>
 <script src="./jsonblobapi.js"></script>
-
+<div id="noedit" class="hide"></div>
 <link rel="stylesheet" href="style.css" />
 <!-- <span class="installlinks">
   <a
@@ -105,7 +105,9 @@
         animation: "fade 0.5s 1",
         animationFillMode: "forwards",
         animationDelay:
-          time == Infinity ? "1000s" : Math.floor(time / 1000) + "s",
+          time == Infinity
+            ? "100000s"
+            : Math.floor(time / 1000) + "s",
       })
       if (time !== Infinity)
         setTimeout(((x) => x?.remove?.()).bind(null, x), time)
@@ -222,18 +224,26 @@
     }
     applyFilter()
   })
-  a.listen(a.qs("#download"), "click", async (e) => {
-    tryLocalSave(window.lastdata, "LOCAL UNSAVED")
-    a.download(
-      window.lastdata,
-      "LOCAL UNSAVED - summer test backup - " + Date.now() + ".json"
-    )
-    var newdata = await API.load()
-    tryLocalSave(newdata, "LAST SAVED")
-    a.download(
-      newdata,
-      "LAST SAVED - summer test backup - " + Date.now() + ".json"
-    )
+  a.listen(a.qs("#download"), {
+    async click(e) {
+      tryLocalSave(window.lastdata, "LOCAL UNSAVED")
+      a.download(
+        window.lastdata,
+        "LOCAL UNSAVED - summer test backup - " + Date.now() + ".json"
+      )
+      var newdata = await API.load()
+      tryLocalSave(newdata, "LAST SAVED")
+      a.download(
+        newdata,
+        "LAST SAVED - summer test backup - " + Date.now() + ".json"
+      )
+    },
+    async contextmenu(e) {
+      e.preventDefault()
+      tryLocalSave(window.lastdata, "LOCAL UNSAVED")
+      var newdata = await API.load()
+      tryLocalSave(newdata, "LAST SAVED")
+    },
   })
   a.qs("#username").value = localStorage.name ?? ""
   a.listen(a.qs("#username"), "change", () => {
@@ -491,29 +501,39 @@
   }
 
   async function like(thing, liked) {
-    var data = JSON.parse(await API.load())
+    startSaving()
     try {
+      var data = JSON.parse(await API.load())
+      loadAllData(data)
       data
         .find((e) => e.name == thing)
         .likes.find((e) => e.name == localStorage.name).liked = liked
       await API.save(JSON.stringify(data))
-    } catch (e) {}
-    loadAllData(data)
+      loadAllData(data)
+    } catch (e) {
+      error("like", e)
+    }
+    stopSaving()
   }
 
   function loadAllData(data) {
-    data = data.toReversed()
-    for (var i = 0; i < data.length; i++) {
-      loaddata(i, data[i])
+    try {
+      data = data.toReversed()
+      for (var i = 0; i < data.length; i++) {
+        loaddata(i, data[i])
+      }
+      var children = a.qsa("table>tbody>*")
+      while (children.length > data.length) {
+        children.pop().remove()
+      }
+      applyFilter()
+    } catch (e) {
+      error("loadAllData", e, data)
     }
-    var children = a.qsa("table>tbody>*")
-    while (children.length > data.length) {
-      children.pop().remove()
-    }
-    applyFilter()
   }
 
   async function updateDesc(event) {
+    startSaving()
     event.preventDefault()
     try {
       log("loading desc")
@@ -524,14 +544,17 @@
       loadAllData(data)
       await API.save(JSON.stringify(data))
       loadAllData(data)
-    } catch (e) {}
-    loadAllData(data)
+    } catch (e) {
+      error("updateDesc", e)
+    }
+    stopSaving()
   }
 
   async function validPlayerCount(event) {
+    startSaving()
     event.preventDefault()
-    var data = JSON.parse(await API.load())
     try {
+      var data = JSON.parse(await API.load())
       var thing = data.find((e) => e.name == event.target.thingname)
       thing.validPlayerCounts ??= []
       if (
@@ -543,13 +566,15 @@
         loadAllData(JSON.parse(await API.load()))
       }
     } catch (e) {
-      loadAllData(data)
+      error("validPlayerCount", e, data)
     }
+    stopSaving()
   }
   async function invalidPlayerCount(event) {
+    startSaving()
     event.preventDefault()
-    var data = JSON.parse(await API.load())
     try {
+      var data = JSON.parse(await API.load())
       var thing = data.find((e) => e.name == event.target.thingname)
       thing.validPlayerCounts ??= []
       if (
@@ -566,38 +591,48 @@
         loadAllData(data)
       }
     } catch (e) {
-      loadAllData(data)
+      error("validPlayerCount", e, data)
     }
+    stopSaving()
   }
   async function addNewEvent(name) {
-    var data = JSON.parse(await API.load())
-    data.push({
-      name,
-      likes: [
-        { name: "jaden", liked: 0 },
-        { name: "river", liked: 0 },
-        { name: "mom", liked: 0 },
-        { name: "pheonix", liked: 0 },
-        { name: "mike", liked: 0 },
-      ],
-    })
-    loadAllData(data)
-    await API.save(JSON.stringify(data))
-    loadAllData(JSON.parse(await API.load()))
+    startSaving()
+    try {
+      var data = JSON.parse(await API.load())
+      data.push({
+        name,
+        likes: [
+          { name: "jaden", liked: 0 },
+          { name: "river", liked: 0 },
+          { name: "mom", liked: 0 },
+          { name: "pheonix", liked: 0 },
+          { name: "mike", liked: 0 },
+        ],
+      })
+      loadAllData(data)
+      await API.save(JSON.stringify(data))
+      loadAllData(JSON.parse(await API.load()))
+    } catch (e) {
+      error("addNewEvent", e, data)
+    }
+    stopSaving()
   }
 
   async function removeEvent(name) {
-    var data = JSON.parse(await API.load())
+    startSaving()
     try {
+      var data = JSON.parse(await API.load())
       data.splice(data.indexOf(data.find((e) => e.name == name)), 1)
       await API.save(JSON.stringify(data))
       loadAllData(data)
       loadAllData(JSON.parse(await API.load()))
     } catch (e) {
-      loadAllData(data)
+      error("removeEvent", e, name)
     }
+    stopSaving()
   }
   async function renameEvent(oldname, newname) {
+    startSaving()
     var data = JSON.parse(await API.load())
     try {
       data.find((e) => e.name == oldname).name = newname
@@ -607,6 +642,7 @@
     } catch (e) {
       loadAllData(data)
     }
+    stopSaving()
   }
 
   function applyFilter() {
@@ -676,4 +712,30 @@
       delete window.onclick
     })
   }
+  var savingtoast
+  function startSaving() {
+    a.qs("#noedit").classList.remove("hide")
+    savingtoast = toast(
+      "SAVING DATA, wait till done",
+      "yellow",
+      Infinity
+    )
+  }
+  function stopSaving() {
+    a.qs("#noedit").classList.add("hide")
+    savingtoast.remove()
+    savingtoast = null
+  }
+  a.listen(
+    window,
+    ["click", "contextmenu", "keydown", "keypress", "keyup"],
+    (e) => {
+      if (savingtoast) {
+        e.stopImmediatePropagation()
+        e.stopPropagation()
+        e.preventDefault()
+      }
+    },
+    true
+  )
 </script>

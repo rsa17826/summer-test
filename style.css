@@ -82,7 +82,14 @@ thead {
   background-color: var(--dark-purple);
   position: sticky;
 }
-
+#noedit {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #0002;
+}
 * > textarea.desc,
 textarea.desc {
   overflow: scroll;
