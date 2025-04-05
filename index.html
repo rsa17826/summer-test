@@ -151,9 +151,10 @@
     if (localStorage.createLocalBackups == "true") {
       try {
         ls.folder ??= await a.getfolder(true)
+
         await saveToFile(
           ls.folder,
-          (extra ? " - " + extra : "") +
+          (extra ? extra + " - " : "") +
             "summer test backup - " +
             getFormattedDateTime() +
             ".json",
