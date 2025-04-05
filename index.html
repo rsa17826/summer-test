@@ -371,6 +371,10 @@
                 display: "flex",
                 flexDirection: "column",
                 gap: "5px",
+                borderLeft: "none",
+                borderRight: "none",
+                borderBottom: "none",
+                // borderTop: "none",
               },
               [
                 a.newelem("input", {
@@ -708,6 +712,32 @@
     }
     stopSaving()
   }
+  async function addComment(event) {
+    var text = event.target.value
+    if (!localStorage.name) {
+      alert("enter username to add comment")
+      return
+    }
+    startSaving()
+    try {
+      var data = JSON.parse(await API.load())
+      var thing = data.find((e) => e.name == event.target.thingname)
+      log(data, thing, event.target.thingname)
+      thing.comments ??= []
+      thing.comments.push({
+        comment: text,
+        date: new Date().toLocaleString(),
+        username: localStorage.name,
+      })
+      loadAllData(data)
+      await API.save(JSON.stringify(data))
+      loadAllData(data)
+      event.target.value = ""
+    } catch (e) {
+      error("addComment", e)
+    }
+    stopSaving()
+  }
 
   function applyFilter() {
     if (!window.filter) return
@@ -791,33 +821,6 @@
         }
       })
     }
-  }
-
-  async function addComment(event) {
-    var text = event.target.value
-    if (!localStorage.name) {
-      alert("enter username to add comment")
-      return
-    }
-    startSaving()
-    try {
-      var data = JSON.parse(await API.load())
-      var thing = data.find((e) => e.name == event.target.thingname)
-      log(data, thing, event.target.thingname)
-      thing.comments ??= []
-      thing.comments.push({
-        comment: text,
-        date: new Date().toLocaleString(),
-        username: localStorage.name,
-      })
-      loadAllData(data)
-      await API.save(JSON.stringify(data))
-      loadAllData(data)
-      event.target.value = ""
-    } catch (e) {
-      error("addComment", e)
-    }
-    stopSaving()
   }
 
   // save prompt
