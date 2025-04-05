@@ -153,9 +153,9 @@
         ls.folder ??= await a.getfolder(true)
         await saveToFile(
           ls.folder,
-          "AUTO summer test backup - " +
+          (extra ? " - " + extra : "") +
+            "summer test backup - " +
             getFormattedDateTime() +
-            (extra ? " - " + extra : "") +
             ".json",
           data
         )
