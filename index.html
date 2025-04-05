@@ -186,72 +186,75 @@
     }
   }
 
-  // add way to filter by users liked/disliked/likable
-  // add way to filter by valid player counts
   const a = loadlib("allfuncs")
-
-  a.listen(window, "scroll", function () {
-    const stickyElement = a.qs("#sticky")
-    if (window.scrollY >= 50) {
-      stickyElement.classList.add("scrolled")
-    } else {
-      stickyElement.classList.remove("scrolled")
-    }
-  })
-  a.qs("#notification").checked = localStorage.sendnoti == "true"
-  a.listen(a.qs("#notification"), "change", (e) => {
-    localStorage.sendnoti = String(a.qs("#notification").checked)
-  })
-  a.qs("#createLocalBackups").checked =
-    localStorage.createLocalBackups == "true"
-  a.listen(a.qs("#createLocalBackups"), "change", (e) => {
-    localStorage.createLocalBackups = String(
-      a.qs("#createLocalBackups").checked
-    )
-  })
-  a.listen(a.qs("#filter"), "change", (e) => {
-    var val = a.qs("#filter").value
-    window.filter ??= {}
-    if (val == "clearAll") {
-      window.filter = {}
-    } else if (val.startsWith("players:")) {
-      if (val == "players:any") delete window.filter.validPlayerCount
-      else
-        window.filter.validPlayerCount = val.replace("players:", "")
-    } else if (val.startsWith("like:")) {
-      if (val == "like:any") delete window.filter.likeStatus
-      else window.filter.likeStatus = val.replace("like:", "")
-    }
-    applyFilter()
-  })
-  a.listen(a.qs("#download"), {
-    async click(e) {
-      tryLocalSave(window.lastdata, "LOCAL UNSAVED")
-      a.download(
-        window.lastdata,
-        "LOCAL UNSAVED - summer test backup - " + Date.now() + ".json"
+  // event listeners
+  {
+    a.listen(window, "scroll", function () {
+      const stickyElement = a.qs("#sticky")
+      if (window.scrollY >= 50) {
+        stickyElement.classList.add("scrolled")
+      } else {
+        stickyElement.classList.remove("scrolled")
+      }
+    })
+    a.qs("#notification").checked = localStorage.sendnoti == "true"
+    a.listen(a.qs("#notification"), "change", (e) => {
+      localStorage.sendnoti = String(a.qs("#notification").checked)
+    })
+    a.qs("#createLocalBackups").checked =
+      localStorage.createLocalBackups == "true"
+    a.listen(a.qs("#createLocalBackups"), "change", (e) => {
+      localStorage.createLocalBackups = String(
+        a.qs("#createLocalBackups").checked
       )
-      var newdata = await API.load()
-      tryLocalSave(newdata, "LAST SAVED")
-      a.download(
-        newdata,
-        "LAST SAVED - summer test backup - " + Date.now() + ".json"
-      )
-    },
-    async contextmenu(e) {
-      e.preventDefault()
-      tryLocalSave(window.lastdata, "LOCAL UNSAVED")
-      var newdata = await API.load()
-      tryLocalSave(newdata, "LAST SAVED")
-    },
-  })
-  a.qs("#username").value = localStorage.name ?? ""
-  a.listen(a.qs("#username"), "change", () => {
-    localStorage.name = a.qs("#username").value
-  })
-  a.listen(a.qs("#addtask"), "click", () => {
-    addNewEvent(a.qs("#taskname").value)
-  })
+    })
+    a.listen(a.qs("#filter"), "change", (e) => {
+      var val = a.qs("#filter").value
+      window.filter ??= {}
+      if (val == "clearAll") {
+        window.filter = {}
+      } else if (val.startsWith("players:")) {
+        if (val == "players:any")
+          delete window.filter.validPlayerCount
+        else
+          window.filter.validPlayerCount = val.replace("players:", "")
+      } else if (val.startsWith("like:")) {
+        if (val == "like:any") delete window.filter.likeStatus
+        else window.filter.likeStatus = val.replace("like:", "")
+      }
+      applyFilter()
+    })
+    a.listen(a.qs("#download"), {
+      async click(e) {
+        tryLocalSave(window.lastdata, "LOCAL UNSAVED")
+        a.download(
+          window.lastdata,
+          "LOCAL UNSAVED - summer test backup - " +
+            Date.now() +
+            ".json"
+        )
+        var newdata = await API.load()
+        tryLocalSave(newdata, "LAST SAVED")
+        a.download(
+          newdata,
+          "LAST SAVED - summer test backup - " + Date.now() + ".json"
+        )
+      },
+      async contextmenu(e) {
+        e.preventDefault()
+        tryLocalSave(window.lastdata, "LOCAL UNSAVED")
+        var newdata = await API.load()
+        tryLocalSave(newdata, "LAST SAVED")
+      },
+    })
+    a.qs("#username").value = localStorage.name ?? ""
+    a.listen(a.qs("#username"), "change", () => {
+      localStorage.name = a.qs("#username").value
+    })
+    a.listen(a.qs("#addtask"), "click", () => {
+      addNewEvent(a.qs("#taskname").value)
+    })
+  }
   window.globalrequest = (data) => {
     if (typeof data == "string") data = { url: data }
     var { url, method, headers } = data
@@ -301,20 +304,9 @@
     //   }
     // }, 100)
   }
-  function sendnoti() {
-    if (!("Notification" in window)) {
-      alert("This browser does not support desktop notification")
-    } else if (Notification.permission === "granted") {
-      const notification = new Notification("data updated!")
-    } else if (Notification.permission !== "denied") {
-      Notification.requestPermission().then((permission) => {
-        if (permission === "granted") {
-          const notification = new Notification("data updated!")
-        }
-      })
-    }
-  }
+
   async function start() {
+    await loadlib("libloader").waitforlib("indexeddb ls")
     await loadlib("libloader").waitforlib("toast")
     const toast = loadlib("toast")
     window.toast = toast
@@ -338,6 +330,22 @@
         await waitForClick()
         await verifyPermission(ls.folder, true)
       }
+  }
+  // data loading functions
+  function loadAllData(data) {
+    try {
+      data = data.toReversed()
+      for (var i = 0; i < data.length; i++) {
+        loaddata(i, data[i])
+      }
+      var children = a.qsa("table>tbody>*")
+      while (children.length > data.length) {
+        children.pop().remove()
+      }
+      applyFilter()
+    } catch (e) {
+      error("loadAllData", e, data)
+    }
   }
   function loaddata(idx, data) {
     const table = a.qs("#table>tbody")
@@ -500,6 +508,7 @@
     descElem.thingname = name
   }
 
+  // data saving funcs
   async function like(thing, liked) {
     startSaving()
     try {
@@ -515,23 +524,6 @@
     }
     stopSaving()
   }
-
-  function loadAllData(data) {
-    try {
-      data = data.toReversed()
-      for (var i = 0; i < data.length; i++) {
-        loaddata(i, data[i])
-      }
-      var children = a.qsa("table>tbody>*")
-      while (children.length > data.length) {
-        children.pop().remove()
-      }
-      applyFilter()
-    } catch (e) {
-      error("loadAllData", e, data)
-    }
-  }
-
   async function updateDesc(event) {
     startSaving()
     event.preventDefault()
@@ -549,7 +541,6 @@
     }
     stopSaving()
   }
-
   async function validPlayerCount(event) {
     startSaving()
     event.preventDefault()
@@ -617,7 +608,6 @@
     }
     stopSaving()
   }
-
   async function removeEvent(name) {
     startSaving()
     try {
@@ -693,6 +683,8 @@
       ? `${things.length - hiden} - ${hiden} = ${things.length}`
       : `total: ${things.length}`
   }
+
+  // file funcs
   async function verifyPermission(fileHandle, write) {
     const options = {}
     if (write) {
@@ -712,6 +704,22 @@
       delete window.onclick
     })
   }
+
+  function sendnoti() {
+    if (!("Notification" in window)) {
+      alert("This browser does not support desktop notification")
+    } else if (Notification.permission === "granted") {
+      const notification = new Notification("data updated!")
+    } else if (Notification.permission !== "denied") {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          const notification = new Notification("data updated!")
+        }
+      })
+    }
+  }
+
+  // save prompt
   var savingtoast
   function startSaving() {
     a.qs("#noedit").classList.remove("hide")
