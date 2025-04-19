@@ -1,4 +1,5 @@
-- prevent your changes from detecting as updated data
+- make data update detection actualy work
+  - prevent your changes from detecting as updated data
 -
 - split filters into seperate dropdowns
 -
