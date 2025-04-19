@@ -323,14 +323,17 @@
         e,
       ])) {
       if (ls.seenIds.includes(id)) continue
-      sendnoti(`new message from "${sender}" on "${thingname}"`, (e) => {
-        focus()
-        elem.scrollIntoView({
-          behavior: "instant",
-          block: "center",
-          inline: "end",
-        })
-      })
+      sendnoti(
+        `new message from "${sender}" on "${thingname}"`,
+        (e) => {
+          focus()
+          elem.scrollIntoView({
+            behavior: "instant",
+            block: "center",
+            inline: "end",
+          })
+        }
+      )
       ls.seenIds.push(id)
     }
   }
@@ -432,8 +435,8 @@
                   innerHTML: "delete",
                   id: "delete",
                   onclick(e) {
-                    if (confirm(this.thingname))
-                      removeEvent(this.thingname)
+                    if (confirm(`delete "${this.thingname}"?`))
+                      deleteEvent(this.thingname)
                   },
                 }),
               ]
@@ -780,7 +783,7 @@
     }
     stopSaving()
   }
-  async function removeEvent(name) {
+  async function deleteEvent(name) {
     startSaving()
     try {
       var data = JSON.parse(await API.load())
