@@ -312,6 +312,29 @@
     // }, 100)
   }
 
+  function findNewSelfAtts() {
+    ls.seenIds ??= []
+    for (var [id, sender, thingname, elem] of a
+      .qsa(".atself")
+      .map((e) => [
+        e.getAttribute("parentid"),
+        e.getAttribute("sender"),
+        e.getAttribute("thingname"),
+        e,
+      ])) {
+      if (ls.seenIds.includes(id)) continue
+      sendnoti(`new message from "${sender}" on "${thingname}"`, (e) => {
+        focus()
+        elem.scrollIntoView({
+          behavior: "instant",
+          block: "center",
+          inline: "end",
+        })
+      })
+      ls.seenIds.push(id)
+    }
+  }
+
   async function start() {
     await loadlib("libloader").waitforlib("indexeddb ls")
     await loadlib("libloader").waitforlib("toast")
@@ -358,6 +381,7 @@
         children.pop().remove()
       }
       applyFilter()
+      findNewSelfAtts()
     } catch (e) {
       error("loadAllData", e, data)
     }
@@ -592,6 +616,20 @@
     )
     commentElem.thingname = name
     var commentsElem = a.qs("tr>td:nth-of-type(6)>#comments", child)
+    function applyAts(text, parentid, sender, thingname) {
+      text = text.replace(
+        /(?<=[\b\s>]|^)@(\w+)/g,
+        function (_, name) {
+          if (localStorage.name === name)
+            return `<span class=atself parentid="${parentid}" sender="${sender}" thingname="${thingname.replace(
+              '"',
+              "_"
+            )}">@${name}</span>`
+          return `<span class=atother parentid="${parentid}">@${name}</span>`
+        }
+      )
+      return text
+    }
     commentsElem.innerHTML = (data.comments || [])
       .map(
         (e) =>
@@ -629,7 +667,10 @@
                             .replace(/[^\x20-\x7E]/g, "")
                       )
                     )
-                    .replace(/<(\/?)p>/g, "<$1span>")
+                    .replace(/<(\/?)p>/g, "<$1span>"),
+                  e.date,
+                  e.username,
+                  name
                 ),
               }),
             ]
@@ -637,15 +678,6 @@
       )
       .join("\n")
     commentsElem.scrollTop = commentsElem.scrollHeight
-  }
-
-  function applyAts(text) {
-    text = text.replace(/(?<=[\b\s>]|^)@(\w+)/g, function (_, name) {
-      if (localStorage.name === name)
-        return `<span class=atself>@${name}</span>`
-      return `<span class=atother>@${name}</span>`
-    })
-    return text
   }
 
   // data saving funcs
@@ -898,17 +930,18 @@
     })
   }
 
-  function sendnoti() {
+  async function sendnoti(text, onclick = () => {}) {
     if (!("Notification" in window)) {
       alert("This browser does not support desktop notification")
-    } else if (Notification.permission === "granted") {
-      const notification = new Notification("data updated!")
-    } else if (Notification.permission !== "denied") {
-      Notification.requestPermission().then((permission) => {
-        if (permission === "granted") {
-          const notification = new Notification("data updated!")
-        }
-      })
+    } else if (
+      Notification.permission === "granted" ||
+      (Notification.permission !== "denied" &&
+        (await Notification.requestPermission()) == "granted")
+    ) {
+      const notification = new Notification(text)
+      notification.onclick = onclick
+    } else {
+      toast("NOTIFICATION: " + text, "yellow")
     }
   }
 

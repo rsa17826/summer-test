@@ -26,7 +26,7 @@ class jsonblobapi {
           tryLocalSave(data, "new")
           loadAllData(JSON.parse(data))
           if (localStorage.sendnoti == "true") {
-            sendnoti()
+            sendnoti("data updated!", () => focus())
           }
         } else log("no data changed")
       }).bind(this),

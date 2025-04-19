@@ -144,9 +144,7 @@ textarea.desc {
   background-color: #0000;
   border: none;
 }
-.atself {
-  color: blue;
-}
+.atself,
 .atother {
-  color: green;
+  color: pink;
 }
