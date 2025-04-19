@@ -342,14 +342,16 @@
   function loadAllData(data) {
     try {
       data = data.toReversed()
+      var testcount = 0
       for (var i = 0; i < data.length; i++) {
         if (
           data[i].name == "testing" &&
           !location.href.includes("127.0.0.1")
         ) {
+          testcount++
           continue
         }
-        loaddata(i, data[i])
+        loaddata(i - testcount, data[i])
       }
       var children = a.qsa("table>tbody>*")
       while (children.length > data.length) {
