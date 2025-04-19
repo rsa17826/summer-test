@@ -4,11 +4,12 @@
 :root {
   /* CSS HEX */
   --tea-green: #deefb7ff;
-  --celadon: #98dfafff;
+  --celadon: #1f6542;
   --caribbean-current: #00635dff;
   --space-cadet: #251f47ff;
   --dark-purple: #260f26ff;
 }
+
 * {
   color: var(--tea-green);
 }
@@ -32,12 +33,16 @@ html {
 }
 button,
 input:not(.taskname),
-textarea {
-  background-color: var(--celadon);
+textarea,
+select {
+  border-radius: 10px;
+  background-color: color-mix(in srgb, var(--celadon) 40%, #0000);
   border-color: var(--tea-green);
   color: #000;
 }
-
+* {
+  border-color: var(--caribbean-current) !important;
+}
 tr,
 tr > * {
   border: 2px solid gray;
@@ -82,7 +87,7 @@ td:last-child:has(#comments) {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 140px; /* Set a height for the td */
+  height: 140px;
 }
 
 #comments {
@@ -127,15 +132,21 @@ textarea.desc {
   top: 29px;
   z-index: 11;
   box-sizing: border-box;
-  background-color: var(--dark-purple);
   width: fit-content;
 }
 @media screen and (max-width: 840px) {
   #sticky.scrolled {
     top: 46px;
+    background-color: var(--dark-purple);
   }
 }
 .taskname {
   background-color: #0000;
   border: none;
+}
+.atself {
+  color: blue;
+}
+.atother {
+  color: green;
 }

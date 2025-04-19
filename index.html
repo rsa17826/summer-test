@@ -343,6 +343,12 @@
     try {
       data = data.toReversed()
       for (var i = 0; i < data.length; i++) {
+        if (
+          data.name == "testing" &&
+          !location.href.includes("127.0.0.1")
+        ) {
+          continue
+        }
         loaddata(i, data[i])
       }
       var children = a.qsa("table>tbody>*")
@@ -611,20 +617,33 @@
                 padding: "2px",
                 paddingRight: "5px",
                 paddingLeft: "5px",
-                innerHTML: marked
-                  .parse(
-                    decensor(
-                      (self ? "" : `${e.username}:\n`) +
-                        e.comment.trim().replace(/[^\x20-\x7E]/g, "")
+                innerHTML: applyAts(
+                  marked
+                    .parse(
+                      decensor(
+                        (self ? "" : `${e.username}:\n`) +
+                          e.comment
+                            .trim()
+                            .replace(/[^\x20-\x7E]/g, "")
+                      )
                     )
-                  )
-                  .replace(/<(\/?)p>/g, "<$1span>"),
+                    .replace(/<(\/?)p>/g, "<$1span>")
+                ),
               }),
             ]
           ).outerHTML
       )
       .join("\n")
     commentsElem.scrollTop = commentsElem.scrollHeight
+  }
+
+  function applyAts(text) {
+    text = text.replace(/(?<=[\b\s>]|^)@(\w+)/g, function (_, name) {
+      if (localStorage.name === name)
+        return `<span class=atself>@${name}</span>`
+      return `<span class=atother>@${name}</span>`
+    })
+    return text
   }
 
   // data saving funcs
