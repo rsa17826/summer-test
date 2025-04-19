@@ -1,8 +1,12 @@
 class jsonblobapi {
   constructor(id) {
     this.saving = 0
+    this.id = id
     this.url = `https://jsonblob.com/api/jsonBlob/${id}`
     this.resetTimer()
+  }
+  openUrl() {
+    window.open("https://jsonblob.com/" + this.id, "_blank")
   }
   resetTimer() {
     if (this.t) {

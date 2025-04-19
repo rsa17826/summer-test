@@ -63,7 +63,8 @@ table {
 .hide {
   display: none;
 }
-.playerCount {
+.playerCount,
+.doneCount {
   display: flex;
   justify-content: center;
   align-items: center;

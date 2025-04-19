@@ -72,6 +72,7 @@
       <th>player count</th>
       <th>likes</th>
       <th>description</th>
+      <th>done count</th>
       <th>comments</th>
     </tr>
   </thead>
@@ -355,8 +356,9 @@
   }
   function loaddata(idx, data) {
     const table = a.qs("#table>tbody")
-    var { name, likes, validPlayerCounts, desc } = data
+    var { name, likes, validPlayerCounts, desc, completions } = data
     validPlayerCounts ??= []
+    completions ??= {}
     desc ??= ""
     if (table.children.length <= idx)
       table.appendChild(
@@ -474,7 +476,38 @@
             ]),
             a.newelem("td", {}, [
               a.newelem("div", {
-                textOverflow: "ellipsis",
+                textContent: "jaden",
+                id: "jaden",
+                class: "doneCount",
+                onclick: addDone,
+              }),
+              a.newelem("div", {
+                textContent: "mike",
+                id: "mike",
+                class: "doneCount",
+                onclick: addDone,
+              }),
+              a.newelem("div", {
+                class: "doneCount",
+                textContent: "mom",
+                id: "mom",
+                onclick: addDone,
+              }),
+              a.newelem("div", {
+                textContent: "pheonix",
+                class: "doneCount",
+                id: "pheonix",
+                onclick: addDone,
+              }),
+              a.newelem("div", {
+                textContent: "river",
+                class: "doneCount",
+                id: "river",
+                onclick: addDone,
+              }),
+            ]),
+            a.newelem("td", {}, [
+              a.newelem("div", {
                 maxHeight: "100px",
                 overflow: "scroll",
                 whiteSpace: "nowrap",
@@ -538,12 +571,19 @@
     descElem.value = desc
     descElem.thingname = name
 
+    var countElem = a.qs("tr>td:nth-of-type(5)", child)
+
+    for (let child of countElem.children) {
+      child.textContent = `${child.id}: ${completions[child.id] ?? 0}`
+      child.thingname = name
+    }
+
     var commentElem = a.qs(
-      "tr>td:nth-of-type(5)>input.comment",
+      "tr>td:nth-of-type(6)>input.comment",
       child
     )
     commentElem.thingname = name
-    var commentsElem = a.qs("tr>td:nth-of-type(5)>#comments", child)
+    var commentsElem = a.qs("tr>td:nth-of-type(6)>#comments", child)
     commentsElem.innerHTML = (data.comments || [])
       .map(
         (e) =>
@@ -736,6 +776,33 @@
       event.target.value = ""
     } catch (e) {
       error("addComment", e)
+    }
+    stopSaving()
+  }
+  async function addDone(event) {
+    if (localStorage.name !== event.target.id) {
+      return
+    }
+    startSaving()
+    try {
+      if (
+        !confirm('you have done "' + event.target.thingname + '"')
+      ) {
+        stopSaving()
+        return
+      }
+      var data = JSON.parse(await API.load())
+      var thing = data.find((e) => e.name == event.target.thingname)
+      log(data, thing, event.target.thingname)
+      thing.completions ??= {}
+      thing.completions[localStorage.name] ??= 0
+      thing.completions[localStorage.name]++
+      loadAllData(data)
+      await API.save(JSON.stringify(data))
+      loadAllData(data)
+      event.target.value = ""
+    } catch (e) {
+      error("addDone", e)
     }
     stopSaving()
   }
