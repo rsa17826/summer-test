@@ -224,11 +224,15 @@
           placeholder: "search in name",
           type: "text",
           id: "search in name",
+          filterType: "name",
+          oninput: updateFilters,
         }),
         a.newelem("input", {
           placeholder: "search in description",
           type: "text",
           id: "search in description",
+          filterType: "description",
+          oninput: updateFilters,
         }),
       ]),
       a.newelem("div", { class: "row" }, [
@@ -1063,6 +1067,18 @@
                 .classList.contains(
                   filter.val == "yes" ? "valid" : "invalid"
                 )
+
+              break
+            case "name":
+              return !a
+                .qs("td:nth-child(1)>.taskname", thing)
+                .value.includes(filter.val)
+
+              break
+            case "description":
+              return !a
+                .qs("td:nth-child(4)>.desc", thing)
+                .value.includes(filter.val)
 
               break
           }
