@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         lib:allfuncs
-// @version      20
+// @version      24
 // @description  none
 // @run-at       document-start
 // @author       rssaromeo
@@ -82,7 +82,7 @@
          * Sets default values for input if they are undefined.
          * @param {...*} input - The default values to set.
          */
-        ifunset: function ifunset(...newinputs) {
+        ifunset: function ifunset(newinputs) {
           for (var i in newinputs) {
             if (inputargs[i] === undefined)
               inputargs[i] = newinputs[i]
@@ -485,18 +485,18 @@
       })
       return arr
     },
-    function ({ end, maketype, args: [e] }) {
-      e = maketype(e, ["string"])
+    function ({ end, maketype, args: [e], ifunset }) {
+      ifunset([location.href])
+      e = maketype(e, ["string", "undefined"])
       return end()
     }
   )
 
   a.updateurlperam = newfunc(
     function updateurlperam(key, value, cangoback) {
-      var g = {
-        ...a.geturlperams(),
-        [key]: value,
-      }
+      var g = a.geturlperams()
+      if (g[key] == value && !cangoback) return
+      g[key] = value
       var k = ""
       var hash = ""
       a.foreach(g, function (key, value) {
@@ -3074,6 +3074,53 @@
       filename = maketype(filename, ["string", "undefined"])
       type = maketype(type, ["string", "undefined"])
       isurl = maketype(isurl, ["boolean", "undefined"])
+      return end()
+    }
+  )
+  a.maketable = newfunc(
+    function maketable(tableData) {
+      const table = a.newelem("table", {}, [])
+      var tbody
+      var first = true
+      for (var tableRow of tableData) {
+        var tr = a.newelem("tr")
+        if (tbody) {
+          tbody.appendChild(tr)
+        } else {
+          table.appendChild(a.newelem("thead", {}, [tr]))
+          table.appendChild((tbody = a.newelem("tbody")))
+        }
+        for (var data of tableRow) {
+          var type = first ? "th" : "td"
+          if (data == null) {
+            var elem = a.newelem(type, {})
+          } else if (a.gettype(data, "string")) {
+            var elem = a.newelem(type, { innerHTML: data })
+          } else if (a.gettype(data, "object")) {
+            var elem = a.newelem(type, data)
+          } else if (a.gettype(data, "array")) {
+            var elem = a.newelem(type, {}, data)
+          } else if (a.gettype(data, "element")) {
+            var elem = a.newelem(type, {}, [data])
+          }
+          tr.appendChild(elem)
+        }
+        first = false
+      }
+      return table
+    },
+    function ({
+      ifunset,
+      gettype,
+      end,
+      maketype,
+      makeenum,
+      trymaketype,
+      trymakeenum,
+      trygettype,
+      args: [tableData],
+    }) {
+      tableData = maketype(tableData, ["array"])
       return end()
     }
   )

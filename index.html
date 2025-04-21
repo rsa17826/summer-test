@@ -9,6 +9,7 @@
 <!-- <script src="./eruda.js"></script> -->
 
 <script src="./cryptojs.js"></script>
+<script src="./js globals/allfuncs.user.js"></script>
 <script src="./protectedtextapi.js"></script>
 <script src="./jsonblobapi.js"></script>
 <div id="noedit" class="hide"></div>
@@ -47,25 +48,9 @@
   />
   <button id="addtask">add task</button>
   <span id="count">loading...</span>
-  <select name="filter" id="filter">
-    <option value="clearAll">clear all filters</option>
-    <optgroup label="valid player counts">
-      <option value="players:any">any</option>
-      <option value="players:1">1</option>
-      <option value="players:2">2</option>
-      <option value="players:3">3</option>
-      <option value="players:4">4</option>
-      <option value="players:5">5</option>
-    </optgroup>
-    <optgroup label="liked state">
-      <option value="like:any">any</option>
-      <option value="like:liked">yes</option>
-      <option value="like:likable">unset</option>
-      <option value="like:disliked">no</option>
-    </optgroup>
-  </select>
+  <button id="filter">show filters</button>
 </div>
-<table id="table">
+<table id="main-contents">
   <thead>
     <tr style="position: sticky">
       <th>name</th>
@@ -78,7 +63,10 @@
   </thead>
   <tbody></tbody>
 </table>
+
+<dialog><div id="filterbg"></div></dialog>
 <script>
+  // toast box
   ;(async () => {
     const a = loadlib("allfuncs")
     await a.bodyload()
@@ -120,31 +108,31 @@
     loadlib("libloader").savelib("toast", toast)
     a.createelem(document.body, "style", {
       innerHTML: `#toastbox {
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      width: fit-content;
-      height: fit-content;
-      background-color: transparent;
-      min-height: 100px;
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      gap: 20px;
-      opacity: 0.7;
-      font-size: large;
-      font-weight: 150;
-      pointer-events: none;
-    }
-    @keyframes fade {
-      0% {
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        width: fit-content;
+        height: fit-content;
+        background-color: transparent;
+        min-height: 100px;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        gap: 20px;
         opacity: 0.7;
+        font-size: large;
+        font-weight: 150;
+        pointer-events: none;
       }
+      @keyframes fade {
+        0% {
+          opacity: 0.7;
+        }
 
-      100% {
-        opacity: 0;
-      }
-    }`,
+        100% {
+          opacity: 0;
+        }
+      }`,
     })
   })()
   window.filter = {}
@@ -190,8 +178,165 @@
       await writableStream.close()
     }
   }
+  var lastapp = Element.prototype.appendChild
+  Element.prototype.appendChild = function (...children) {
+    for (var child of children) lastapp.call(this, child)
+  }
 
   const a = loadlib("allfuncs")
+  // setup filter ui
+  {
+    const filterbg = a.qs("#filterbg")
+    const users = ["river", "jaden", "mom", "pheonix", "mike"].sort()
+
+    filterbg.appendChild(
+      a.newelem("button", {
+        class: "row",
+        position: "relative",
+        top: 0,
+        right: "-420px",
+        width: "30px",
+        height: "30px",
+        innerHTML: "X",
+        autofocus: 1,
+        onclick: () => {
+          a.qs("dialog:has(#filterbg)").close()
+        },
+      }),
+      a.newelem("div", { class: "row" }, [
+        a.newelem("button", {
+          onclick: () => {
+            // window.filter = {}
+            a.qsa("select", filterbg).forEach((e) => {
+              e.value = ""
+              e.onchange()
+            })
+          },
+          innerHTML: "clear filters",
+        }),
+      ]),
+      a.newelem("div", { class: "row" }, [
+        // a.newelem("label", {
+        //   for: "search in name",
+        //   innerHTML: "search in name",
+        // }),
+        a.newelem("input", {
+          placeholder: "search in name",
+          type: "text",
+          id: "search in name",
+        }),
+        a.newelem("input", {
+          placeholder: "search in description",
+          type: "text",
+          id: "search in description",
+        }),
+      ]),
+      a.newelem("div", { class: "row" }, [
+        a.maketable([
+          [null, { innerHTML: "liked" }],
+          ...users.map((user) => {
+            return [
+              { innerHTML: user },
+              a.newelem(
+                "select",
+                {
+                  filterType: "like",
+                  filterUser: user,
+                  onchange: updateFilters,
+                },
+                [
+                  a.newelem("option", {
+                    value: "",
+                    innerHTML: "unset",
+                  }),
+                  a.newelem("option", {
+                    value: "undecided",
+                    innerHTML: "undecided",
+                  }),
+                  a.newelem("option", {
+                    value: "yes",
+                    innerHTML: "yes",
+                  }),
+                  a.newelem("option", {
+                    value: "no",
+                    innerHTML: "no",
+                  }),
+                ]
+              ),
+            ]
+          }),
+        ]),
+        a.maketable([
+          [null, { innerHTML: "done" }],
+          ...users.map((user) => {
+            return [
+              { innerHTML: user },
+              a.newelem(
+                "select",
+                {
+                  filterType: "done",
+                  filterUser: user,
+                  onchange: updateFilters,
+                },
+                [
+                  a.newelem("option", {
+                    value: "",
+                    innerHTML: "unset",
+                  }),
+                  a.newelem("option", {
+                    value: "yes",
+                    innerHTML: "yes",
+                  }),
+                  a.newelem("option", {
+                    value: "no",
+                    innerHTML: "no",
+                  }),
+                ]
+              ),
+            ]
+          }),
+        ]),
+        a.maketable([
+          [null, { innerHTML: "player count" }],
+          ...[1, 2, 3, 4, 5].map((user) => {
+            return [
+              { innerHTML: user },
+              a.newelem(
+                "select",
+                {
+                  filterType: "player count",
+                  filterUser: user,
+                  onchange: updateFilters,
+                },
+                [
+                  a.newelem("option", {
+                    value: "",
+                    innerHTML: "unset",
+                  }),
+                  a.newelem("option", {
+                    value: "yes",
+                    innerHTML: "yes",
+                  }),
+                  a.newelem("option", {
+                    value: "no",
+                    innerHTML: "no",
+                  }),
+                ]
+              ),
+            ]
+          }),
+        ]),
+      ])
+    )
+    // throw new Error(`show filter ui`)
+    function updateFilters(e) {
+      // log(this.filterType, this.filterUser, this.value)
+      window.filters ??= {}
+      window.filters[this.filterType] ??= {}
+      window.filters[this.filterType][this.filterUser] = this.value
+      applyFilters()
+    }
+  }
   // event listeners
   {
     a.listen(window, "scroll", function () {
@@ -213,21 +358,22 @@
         a.qs("#createLocalBackups").checked
       )
     })
-    a.listen(a.qs("#filter"), "change", (e) => {
-      var val = a.qs("#filter").value
-      window.filter ??= {}
-      if (val == "clearAll") {
-        window.filter = {}
-      } else if (val.startsWith("players:")) {
-        if (val == "players:any")
-          delete window.filter.validPlayerCount
-        else
-          window.filter.validPlayerCount = val.replace("players:", "")
-      } else if (val.startsWith("like:")) {
-        if (val == "like:any") delete window.filter.likeStatus
-        else window.filter.likeStatus = val.replace("like:", "")
-      }
-      applyFilter()
+    a.listen(a.qs("#filter"), "click", (e) => {
+      a.qs("dialog:has(#filterbg)").showModal()
+      // var val = a.qs("#filter").value
+      // window.filter ??= {}
+      // if (val == "clearAll") {
+      //   window.filter = {}
+      // } else if (val.startsWith("players:")) {
+      //   if (val == "players:any")
+      //     delete window.filter.validPlayerCount
+      //   else
+      //     window.filter.validPlayerCount = val.replace("players:", "")
+      // } else if (val.startsWith("like:")) {
+      //   if (val == "like:any") delete window.filter.likeStatus
+      //   else window.filter.likeStatus = val.replace("like:", "")
+      // }
+      // applyFilter()
     })
     a.listen(a.qs("#download"), {
       async click(e) {
@@ -379,18 +525,18 @@
         }
         loaddata(i - testcount, data[i])
       }
-      var children = a.qsa("table>tbody>*")
+      var children = a.qsa("table#main-contents>tbody>*")
       while (children.length > data.length) {
         children.pop().remove()
       }
-      applyFilter()
+      applyFilters()
       findNewSelfAtts()
     } catch (e) {
       error("loadAllData", e, data)
     }
   }
   function loaddata(idx, data) {
-    const table = a.qs("#table>tbody")
+    const table = a.qs("#main-contents>tbody")
     var { name, likes, validPlayerCounts, desc, completions } = data
     validPlayerCounts ??= []
     completions ??= {}
@@ -609,7 +755,10 @@
     var countElem = a.qs("tr>td:nth-of-type(5)", child)
 
     for (let child of countElem.children) {
-      child.textContent = `${child.id}: ${completions[child.id] ?? 0}`
+      child.doneCount = completions[child.id] ?? 0
+      child.textContent = `${child.id}: ${child.doneCount}`
+      if (completions[child.id]) child.classList.add("liked")
+      else child.classList.remove("liked")
       child.thingname = name
     }
 
@@ -863,48 +1012,105 @@
     stopSaving()
   }
 
-  function applyFilter() {
-    if (!window.filter) return
-    const { likeStatus, validPlayerCount, inTitle } = window.filter
-    var things = a.qsa("#table > tbody > tr")
+  function applyFilters() {
+    window.filters ??= {}
+    const filters = [
+      Object.keys(window.filters).map((type) => {
+        return Object.keys(window.filters[type]).map((user) => {
+          log(window.filters[type][user])
+          return { type, user, val: window.filters[type][user] }
+        })
+      }),
+    ].flat(2)
+
+    var things = a.qsa("#main-contents > tbody > tr")
     var hiden = 0
     for (var thing of things) {
       thing.classList.remove("hide")
-      var you = a
-        .qsa("td:nth-child(3) > div", thing)
-        .find((e) => e.textContent == localStorage.name)
-      if (!you) {
-        error("invalid name set!")
-        window.filter = null
-        return
-      }
-      if (likeStatus && !you.classList.contains(likeStatus)) {
-        thing.classList.add("hide")
-        hiden++
-        continue
-      }
-      var playerCounts = a
-        .qsa("td:nth-child(2) > div", thing)
-        .filter((e) => e.classList.contains("valid"))
-        .map((e) => e.textContent.trim())
-      if (
-        validPlayerCount &&
-        !playerCounts.includes(String(validPlayerCount))
-      ) {
-        thing.classList.add("hide")
-        hiden++
-        continue
-      }
-      if (
-        inTitle &&
-        !a
-          .qs("td:first-child > input", thing)
-          .value.toLowerCase()
-          .includes(inTitle.toLowerCase())
-      ) {
-        thing.classList.add("hide")
-        hiden++
-        continue
+      for (var filter of filters) {
+        if (filter.val == "") continue
+        var removed = (() => {
+          switch (filter.type) {
+            case "like":
+              switch (filter.val) {
+                case "yes":
+                  return !a
+                    .qsa("td:nth-child(3)>.liked", thing)
+                    .find((e) => e.textContent == filter.user)
+                case "no":
+                  return !a
+                    .qsa("td:nth-child(3)>.disliked", thing)
+                    .find((e) => e.textContent == filter.user)
+                case "undecided":
+                  return !a
+                    .qsa("td:nth-child(3)>.likable", thing)
+                    .find((e) => e.textContent == filter.user)
+              }
+              if (thing.classList.contains(filter.val)) return
+              break
+            case "done":
+              return !(
+                a
+                  .qsa("td:nth-child(5)>.doneCount", thing)
+                  .find((e) => e.id == filter.user).doneCount ==
+                (filter.val == "yes")
+              )
+              break
+            case "player count":
+              return !a
+                .qsa("td:nth-child(2)>.playerCount", thing)
+                .find((e) => e.textContent == filter.user)
+                .classList.contains(
+                  filter.val == "yes" ? "valid" : "invalid"
+                )
+
+              break
+          }
+        })()
+        if (removed) {
+          hiden++
+          thing.classList.add("hide")
+          break
+        }
+        // var youLikeStatusElem = a
+        //   .qsa("td:nth-child(3) > div", thing)
+        //   .find((e) => e.textContent == localStorage.name)
+        // if (!youLikeStatusElem) {
+        //   error("invalid name set!")
+        //   window.filters = null
+        //   return
+        // }
+        // if (
+        //   likeStatus &&
+        //   !youLikeStatusElem.classList.contains(likeStatus)
+        // ) {
+        //   thing.classList.add("hide")
+        //   hiden++
+        //   continue
+        // }
+        // var playerCounts = a
+        //   .qsa("td:nth-child(2) > div", thing)
+        //   .filter((e) => e.classList.contains("valid"))
+        //   .map((e) => e.textContent.trim())
+        // if (
+        //   validPlayerCount &&
+        //   !playerCounts.includes(String(validPlayerCount))
+        // ) {
+        //   thing.classList.add("hide")
+        //   hiden++
+        //   continue
+        // }
+        // if (
+        //   inTitle &&
+        //   !a
+        //     .qs("td:first-child > input", thing)
+        //     .value.toLowerCase()
+        //     .includes(inTitle.toLowerCase())
+        // ) {
+        //   thing.classList.add("hide")
+        //   hiden++
+        //   continue
+        // }
       }
     }
     a.qs("#count").textContent = hiden

@@ -1,9 +1,15 @@
 - make data update detection actualy work
   - prevent your changes from detecting as updated data
 -
-- split filters into seperate dropdowns
+- add way to show/hide filters
 -
-- add filter for others likes?
+- make filter changes actualy apply the filter
+-
+- save filters
+-
+- add save import/export
+-
+- add save auto sync?
 -
 - add filter for thingname
 -
@@ -11,8 +17,7 @@
 -
 - add css editor?
 -
-- add simple var color replacer 
+- add simple var color replacer
 -
 - add filter for done counts
-  - 0/ect
   - </>?
