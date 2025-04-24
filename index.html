@@ -23,6 +23,8 @@
   <a href="./globalrequest.user.js" target="_self">globalrequest</a>
 </span> -->
 <button id="download">download</button>
+<button id="importData">import data</button>
+<button id="exportData">export data</button>
 <input
   type="text"
   autocomplete="off"
@@ -426,6 +428,49 @@
         a.qs("#taskname").value = ""
       }
     })
+    a.listen(a.qs("#exportData"), "click", async () => {
+      var allData = {
+        ls,
+        name: localStorage.name,
+        sendnoti: localStorage.sendnoti,
+        createLocalBackups: localStorage.createLocalBackups,
+      }
+      if (allData.ls.folder) allData.ls.folder = ls.folder.name
+      allData = JSON.stringify(allData, null, 2)
+      log(allData)
+      a.download(allData, "summer test data backup.json")
+    })
+    a.listen(a.qs("#importData"), "click", async () => {
+      var {
+        ls: lsData,
+        name,
+        sendnoti,
+        createLocalBackups,
+      } = JSON.parse(prompt("save data"))
+      if (!name || !sendnoti || !createLocalBackups) {
+        alert("Import failed")
+        return
+      }
+      await ls.clear()
+      ls.all = lsData
+      if (lsData) {
+        while (1) {
+          alert(`select folder: ${lsData.folder}`)
+          ls.folder = await a.getfolder(true)
+          if (
+            ls.folder.name == lsData.folder ||
+            confirm(`use folder "${ls.folder.name}" instead?`)
+          ) {
+            break
+          }
+        }
+      }
+      Object.assign(localStorage, {
+        name,
+        sendnoti,
+        createLocalBackups,
+      })
+    })
   }
 
   window.globalrequest = (data) => {
@@ -511,6 +556,10 @@
     window.toast = toast
     const ls = await loadlib("indexeddb ls")("summer test")
     window.ls ??= ls
+    if (Notification.permission !== "granted") {
+      toast("please allow notifications", "red")
+      await getNotificationPermission()
+    }
     // a.qs(".installlinks").classList.add("hide")
     const API = (window.API = await new jsonblobapi(
       "1352826891148648448"
@@ -802,6 +851,7 @@
       )
       return text
     }
+    var self
     commentsElem.innerHTML = (data.comments || [])
       .map(
         (e) =>
@@ -1130,17 +1180,26 @@
   }
 
   async function sendnoti(text, onclick = () => {}) {
-    if (!("Notification" in window)) {
-      alert("This browser does not support desktop notification")
-    } else if (
-      Notification.permission === "granted" ||
-      (Notification.permission !== "denied" &&
-        (await Notification.requestPermission()) == "granted")
-    ) {
+    if (await getNotificationPermission()) {
       const notification = new Notification(text)
       notification.onclick = onclick
     } else {
       toast("NOTIFICATION: " + text, "yellow")
+    }
+  }
+  async function getNotificationPermission() {
+    try {
+      if (
+        Notification.permission === "granted" ||
+        (Notification.permission !== "denied" &&
+          (await Notification.requestPermission()) == "granted")
+      ) {
+        return true
+      }
+      return false
+    } catch (e) {
+      await waitForClick()
+      return (await Notification.requestPermission()) == "granted"
     }
   }
 
