@@ -194,7 +194,7 @@
         class: "row",
         position: "relative",
         top: 0,
-        right: "-420px",
+        left: "calc(100% - 25px)",
         width: "30px",
         height: "30px",
         innerHTML: "X",
@@ -247,6 +247,11 @@
                   filterType: "like",
                   filterUser: user,
                   onchange: updateFilters,
+                  oncontextmenu(e) {
+                    e.preventDefault()
+                    this.value = ""
+                    this.onchange()
+                  },
                 },
                 [
                   a.newelem("option", {
@@ -281,6 +286,11 @@
                   filterType: "done",
                   filterUser: user,
                   onchange: updateFilters,
+                  oncontextmenu(e) {
+                    e.preventDefault()
+                    this.value = ""
+                    this.onchange()
+                  },
                 },
                 [
                   a.newelem("option", {
@@ -311,6 +321,11 @@
                   filterType: "player count",
                   filterUser: user,
                   onchange: updateFilters,
+                  oncontextmenu(e) {
+                    e.preventDefault()
+                    this.value = ""
+                    this.onchange()
+                  },
                 },
                 [
                   a.newelem("option", {
@@ -362,22 +377,17 @@
         a.qs("#createLocalBackups").checked
       )
     })
-    a.listen(a.qs("#filter"), "click", (e) => {
-      a.qs("dialog:has(#filterbg)").showModal()
-      // var val = a.qs("#filter").value
-      // window.filter ??= {}
-      // if (val == "clearAll") {
-      //   window.filter = {}
-      // } else if (val.startsWith("players:")) {
-      //   if (val == "players:any")
-      //     delete window.filter.validPlayerCount
-      //   else
-      //     window.filter.validPlayerCount = val.replace("players:", "")
-      // } else if (val.startsWith("like:")) {
-      //   if (val == "like:any") delete window.filter.likeStatus
-      //   else window.filter.likeStatus = val.replace("like:", "")
-      // }
-      // applyFilter()
+    a.listen(a.qs("#filter"), {
+      click(e) {
+        a.qs("dialog:has(#filterbg)").showModal()
+      },
+      contextmenu(e) {
+        e.preventDefault()
+        a.qsa("select", filterbg).forEach((e) => {
+          e.value = ""
+          e.onchange()
+        })
+      },
     })
     a.listen(a.qs("#download"), {
       async click(e) {
@@ -856,9 +866,9 @@
     startSaving()
     event.preventDefault()
     try {
-      log("loading desc")
+      // log("loading desc")
       var data = JSON.parse(await API.load())
-      log("done loading desc")
+      // log("done loading desc")
       var thing = data.find((e) => e.name == event.target.thingname)
       thing.desc = event.target.value
       loadAllData(data)
@@ -972,7 +982,7 @@
     try {
       var data = JSON.parse(await API.load())
       var thing = data.find((e) => e.name == event.target.thingname)
-      log(data, thing, event.target.thingname)
+      // log(data, thing, event.target.thingname)
       thing.comments ??= []
       thing.comments.push({
         comment: text,
@@ -1002,7 +1012,7 @@
       }
       var data = JSON.parse(await API.load())
       var thing = data.find((e) => e.name == event.target.thingname)
-      log(data, thing, event.target.thingname)
+      // log(data, thing, event.target.thingname)
       thing.completions ??= {}
       thing.completions[localStorage.name] ??= 0
       thing.completions[localStorage.name]++
@@ -1021,7 +1031,6 @@
     const filters = [
       Object.keys(window.filters).map((type) => {
         return Object.keys(window.filters[type]).map((user) => {
-          log(window.filters[type][user])
           return { type, user, val: window.filters[type][user] }
         })
       }),
