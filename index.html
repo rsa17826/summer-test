@@ -416,9 +416,15 @@
     a.listen(a.qs("#username"), "change", () => {
       localStorage.name = a.qs("#username").value
     })
-    a.listen(a.qs("#addtask"), "click", () => {
-      addNewEvent(a.qs("#taskname").value)
+    a.listen(a.qs("#addtask"), "click", async () => {
+      await addNewEvent(a.qs("#taskname").value)
       a.qs("#taskname").value = ""
+    })
+    a.listen(a.qs("#taskname"), "keypress", async (e) => {
+      if (e.key.toLowerCase() == "enter" || e.key == "\n") {
+        await addNewEvent(a.qs("#taskname").value)
+        a.qs("#taskname").value = ""
+      }
     })
   }
 
@@ -531,7 +537,7 @@
       var testcount = 0
       for (var i = 0; i < data.length; i++) {
         if (
-          data[i].name == "testing" &&
+          ["testing", "test"].includes(data[i].name.toLowerCase()) &&
           !location.href.includes("127.0.0.1")
         ) {
           testcount++
