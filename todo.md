@@ -1,17 +1,9 @@
 - make data update detection actualy work
   - prevent your changes from detecting as updated data
 -
-- add way to show/hide filters
--
-- make filter changes actualy apply the filter
--
 - save filters
 -
-- add save import/export
--
-- add save auto sync?
--
-- add filter for thingname
+- add save auto sync? / add jsonblob data storage sync?
 -
 - add filter for comments?
 -
@@ -19,5 +11,5 @@
 -
 - add simple var color replacer
 -
-- add filter for done counts
+- add filter for done counts?
   - </>?
