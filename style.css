@@ -160,7 +160,7 @@ input.taskname {
   gap: 0.7rem;
 }
 
-dialog:has(#filterbg) {
+dialog#filters {
   z-index: 30;
   width: fit-content;
   height: fit-content;
@@ -179,7 +179,7 @@ dialog:has(#filterbg) {
   align-items: center;
 }
 
-dialog:has(#filterbg)::backdrop {
+dialog#filters::backdrop {
   background: radial-gradient(
     circle at center,
     #445,

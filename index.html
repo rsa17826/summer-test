@@ -64,7 +64,7 @@
   <tbody></tbody>
 </table>
 
-<dialog><div id="filterbg"></div></dialog>
+<dialog id="filters"><div id="filterbg"></div></dialog>
 <script>
   // toast box
   ;(async () => {
@@ -200,7 +200,7 @@
         innerHTML: "X",
         autofocus: 1,
         onclick: () => {
-          a.qs("dialog:has(#filterbg)").close()
+          a.qs("dialog#filters").close()
         },
       }),
       a.newelem("div", { class: "row" }, [
@@ -379,7 +379,7 @@
     })
     a.listen(a.qs("#filter"), {
       click(e) {
-        a.qs("dialog:has(#filterbg)").showModal()
+        a.qs("dialog#filters").showModal()
       },
       contextmenu(e) {
         e.preventDefault()
