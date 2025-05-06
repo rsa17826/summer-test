@@ -1229,4 +1229,60 @@
     },
     true
   )
+
+  // data compare
+  function compareNestedJson(json1, json2) {
+    const diffPaths = []
+
+    function compareObjects(obj1, obj2, path = "") {
+      let checked = []
+      for (let key of Object.keys(obj1)) {
+        checked.push(key)
+        if (!(key in obj2)) {
+          diffPaths.push({
+            path: `${path}.${key}`.replace(/^\./, ""),
+            type: "removed",
+            from: obj1[key],
+          })
+        } else if (!same(obj1[key], obj2[key])) {
+          if (
+            a.gettype(obj1[key], ["object", "array"]) &&
+            a.gettype(obj2[key], ["object", "array"])
+          ) {
+            compareObjects(obj1[key], obj2[key], `${path}.${key}`)
+          } else {
+            diffPaths.push({
+              path: `${path}.${key}`.replace(/^\./, ""),
+              type: "diff",
+              from: obj1[key],
+              to: obj2[key],
+            })
+          }
+        } else {
+          if (
+            a.gettype(obj1[key], ["object", "array"]) &&
+            a.gettype(obj2[key], ["object", "array"])
+          ) {
+            compareObjects(obj1[key], obj2[key], `${path}.${key}`)
+          }
+        }
+      }
+      for (let key of Object.keys(obj2)) {
+        if (!checked.includes(key)) {
+          diffPaths.push({
+            checked,
+            path: `${path}.${key}`.replace(/^\./, ""),
+            type: "added",
+            to: obj2[key],
+          })
+        }
+      }
+    }
+    compareObjects(json1, json2)
+
+    function same(x, y) {
+      return JSON.stringify(x) === JSON.stringify(y)
+    }
+    return diffPaths
+  }
 </script>

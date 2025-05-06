@@ -20,17 +20,56 @@ class jsonblobapi {
         }
         var data = await this.load(true)
         if (data !== window.lastdata) {
+          var changes = compareNestedJson(
+            JSON.parse(window.lastdata),
+            JSON.parse(data)
+          )
+          log(changes)
           log("DATA CHANGED")
-          window.lastdata = data
           tryLocalSave(lastdata, "prev")
           tryLocalSave(data, "new")
-          loadAllData(JSON.parse(data))
+          window.lastdata = data
+          loadAllData((data = JSON.parse(data)))
           if (localStorage.sendnoti == "true") {
-            sendnoti("data updated!", () => focus())
+            for (var change of changes) {
+              var func = (() => {
+                focus()
+              }).bind(this, change)
+              var id = change.path.split(".")[0]
+              switch (change.type) {
+                case "added":
+                  var name = change.to.name
+                  if (/^\d+$/.test(change.path))
+                    sendnoti(`Added new task: "${name}"`, func)
+                  if (/^\d+\.desc$/.test(change.path))
+                    sendnoti(
+                      `added description to task: "${name}"`,
+                      func
+                    )
+                  if (/^\d+\.completed$/.test(change.path))
+                    sendnoti(`completed task: "${name}"`, func)
+                  break
+                case "diff":
+                  log([data, id, data[id]])
+                  var name = data[id].name
+                  if (/^\d+\.desc$/.test(change.path))
+                    sendnoti(
+                      `changed description of task: "${name}"`,
+                      func
+                    )
+                  break
+                case "removed":
+                  if (/^\d+$/.test(change.path)) {
+                    var name = change.from.name
+                    sendnoti(`removed task: "${name}"`, func)
+                  }
+                  break
+              }
+            }
           }
         } else log("no data changed")
       }).bind(this),
-      1 * 60 * 1000
+      1 * (ls.refreshInterval ??= 30) * 1000
     )
   }
   async load(dontsave) {
