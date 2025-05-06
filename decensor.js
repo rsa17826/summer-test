@@ -188,15 +188,7 @@ webtoon`
     `${a}`,
   ])
 
-const replacementLookup = Object.fromEntries(
-  replace.map(([regex, replacement]) => [regex.source, replacement])
-)
-const combinedRegex = new RegExp(
-  replace.map(([regex]) => `(${regex.source})`).join("|"),
-  "gi"
-)
-//log(combinedRegex)
-replace = []
+// replace = []
 //replace.push([/([a-z]+)\.([a-z]+)\.(?:([a-z]+)\.)?(?:([a-z]+)\.)?(?:([a-z]+)\.)?(?:([a-z]+)\.)?(?:([a-z]+)\.)?([a-z]+)/gi, "$1$2$3$4$5$6$7$8"])
 replace.push([/(?<=^|[^\d\w])\*(\w+( \w+)*)\*(?=[^\w\d]|$)/gi, "$1"])
 replace.push([/what( ?ever)? the duck/gi, "what$1 the fuck"])
@@ -231,16 +223,6 @@ replace.push([/(?<!\w)frick(?!\w)/gi, "fuck"])
 replace.push([/(?<!\w)fricker(?!\w)/gi, "fucker"])
 
 function decensor(text) {
-  text = text.replace(combinedRegex, (match) => {
-    for (const [source, replacement] of Object.entries(
-      replacementLookup
-    )) {
-      if (new RegExp(source, "i").test(match)) {
-        return replacement
-      }
-    }
-    return match // Fallback if no replacement found
-  })
   for (var r of replace) {
     text = text.replace(r[0], r[1])
   }

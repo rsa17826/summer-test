@@ -430,7 +430,7 @@
     })
     a.listen(a.qs("#exportData"), "click", async () => {
       var allData = {
-        ls,
+        ls: { ...ls },
         name: localStorage.name,
         sendnoti: localStorage.sendnoti,
         createLocalBackups: localStorage.createLocalBackups,

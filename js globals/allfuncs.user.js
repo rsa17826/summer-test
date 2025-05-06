@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         lib:allfuncs
-// @version      24
+// @version      26
 // @description  none
 // @run-at       document-start
 // @author       rssaromeo
@@ -372,7 +372,7 @@
               type = a.matchall(type, /[a-z]+/g)
             type.forEach((type) => {
               const newcb = function (...e) {
-                cb(...e)
+                cb.call(elem, ...e)
               }
               elem.addEventListener(type, newcb, istrue)
               all.push([elem, type, newcb, istrue])
@@ -1829,13 +1829,39 @@
       if (readWrite) {
         options.mode = "readwrite"
       }
-      return (
-        (await fileHandle.queryPermission(options)) === "granted" ||
-        (await fileHandle.requestPermission(options)) === "granted"
-      )
+      try {
+        return (
+          (await fileHandle.queryPermission(options)) === "granted" ||
+          (await fileHandle.requestPermission(options)) === "granted"
+        )
+      } catch (e) {
+        await a.waitforclick()
+        return (
+          (await fileHandle.queryPermission(options)) === "granted" ||
+          (await fileHandle.requestPermission(options)) === "granted"
+        )
+      }
     },
     function ({ end, args: [fileHandle, readWrite], maketype }) {
       readWrite = maketype(readWrite, ["boolean", "undefined"]) // Ensure readWrite is a boolean or undefined
+      return end()
+    }
+  )
+  a.waitforclick = newfunc(
+    async function waitforclick(fileHandle, readWrite) {
+      return new Promise((resolve) => {
+        var listener = a.listen(
+          window,
+          "click",
+          () => {
+            a.unlisten(listener)
+            resolve()
+          },
+          true
+        )
+      })
+    },
+    function ({ end, args: [] }) {
       return end()
     }
   )
