@@ -15,7 +15,7 @@ class jsonblobapi {
     }
     this.t = setTimeout(
       this.checkDataChange.bind(this),
-      1 * (ls.refreshInterval ??= 30) * 1000
+      1 * (ls.refreshInterval ||= 30) * 1000
     )
   }
   async checkDataChange() {
@@ -24,6 +24,7 @@ class jsonblobapi {
       return
     }
     var data = await this.load(true)
+    ls.lastdata ??= data
     if (data !== ls.lastdata) {
       var changes = compareNestedJson(
         JSON.parse(ls.lastdata),

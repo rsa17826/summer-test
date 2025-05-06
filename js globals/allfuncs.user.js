@@ -382,7 +382,7 @@
           type = a.matchall(type, /[a-z]+/g)
           type.forEach((type) => {
             const newcb = function (e) {
-              cb(e, type)
+              cb.call(elem, e, type)
             }
             elem.addEventListener(type, newcb, istrue)
             all.push([elem, type, newcb, istrue])

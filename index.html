@@ -39,6 +39,14 @@
   id="createLocalBackups"
 />
 <label for="createLocalBackups">createLocalBackups</label>
+<input
+  type="number"
+  min="5"
+  name="dataPullInterval"
+  value="60"
+  id="dataPullInterval"
+/>
+<label for="dataPullInterval">data reload interval</label>
 <br />
 <span>left click for yes, right click for no</span>
 <div id="sticky">
@@ -539,11 +547,8 @@
         `new message from "${sender}" on "${thingname}"`,
         (e) => {
           focus()
-          elem.scrollIntoView({
-            behavior: "instant",
-            block: "center",
-            inline: "end",
-          })
+          window.filters = { name: { undefined: thingname } }
+          applyFilters()
         }
       )
       ls.seenIds.push(id)
@@ -557,7 +562,12 @@
     window.toast = toast
     const ls = await loadlib("indexeddb ls")("summer test")
     window.ls ??= ls
-    ls.lastdata ??= "[]"
+    a.qs("#dataPullInterval").value = ls.refreshInterval ||= 60
+    a.listen(a.qs("#dataPullInterval"), "change", function (...e) {
+      log(this, e)
+      ls.refreshInterval = Number(this.value)
+    })
+    // ls.lastdata ??= "[]"
 
     if (Notification.permission !== "granted") {
       toast("please allow notifications", "red")
