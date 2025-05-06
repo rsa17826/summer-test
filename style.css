@@ -182,16 +182,8 @@ dialog#filters {
 dialog#filters::backdrop {
   background: radial-gradient(
     circle at center,
-    #445,
-    #454,
-    #454,
-    #445c,
-    #454a,
-    #5448,
-    #4456,
-    #4454,
-    #5442,
-    #4450
+    #0003 10%,
+    #000
   );
-  opacity: 0.75;
+  opacity: 0.9;
 }
