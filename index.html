@@ -137,7 +137,7 @@
       }`,
     })
   })()
-  window.filter = {}
+  window.filters = {}
   async function tryLocalSave(data, extra = "") {
     if (localStorage.createLocalBackups == "true") {
       try {
@@ -208,10 +208,10 @@
       a.newelem("div", { class: "row" }, [
         a.newelem("button", {
           onclick: () => {
-            // window.filter = {}
-            a.qsa("select", filterbg).forEach((e) => {
+            a.qsa(":is(select, input)", filterbg).forEach((e) => {
               e.value = ""
-              e.onchange()
+              e.onchange?.()
+              e.oninput?.()
             })
           },
           innerHTML: "clear filters",
@@ -385,17 +385,18 @@
       },
       contextmenu(e) {
         e.preventDefault()
-        a.qsa("select", filterbg).forEach((e) => {
+        a.qsa(":is(select, input)", filterbg).forEach((e) => {
           e.value = ""
-          e.onchange()
+          e.onchange?.()
+          e.oninput?.()
         })
       },
     })
     a.listen(a.qs("#download"), {
       async click(e) {
-        tryLocalSave(window.lastdata, "LOCAL UNSAVED")
+        tryLocalSave(ls.lastdata, "LOCAL UNSAVED")
         a.download(
-          window.lastdata,
+          ls.lastdata,
           "LOCAL UNSAVED - summer test backup - " +
             Date.now() +
             ".json"
@@ -409,7 +410,7 @@
       },
       async contextmenu(e) {
         e.preventDefault()
-        tryLocalSave(window.lastdata, "LOCAL UNSAVED")
+        tryLocalSave(ls.lastdata, "LOCAL UNSAVED")
         var newdata = await API.load()
         tryLocalSave(newdata, "LAST SAVED")
       },
@@ -556,6 +557,8 @@
     window.toast = toast
     const ls = await loadlib("indexeddb ls")("summer test")
     window.ls ??= ls
+    ls.lastdata ??= "[]"
+
     if (Notification.permission !== "granted") {
       toast("please allow notifications", "red")
       await getNotificationPermission()
@@ -568,7 +571,7 @@
     //   "summerplans",
     //   "summertest"
     // ))
-    var data = JSON.parse((window.lastdata = await API.load()))
+    var data = JSON.parse((ls.lastdata = await API.load()))
     await a.bodyload()
     loadAllData(data)
     if (ls.folder)
@@ -1270,7 +1273,6 @@
       for (let key of Object.keys(obj2)) {
         if (!checked.includes(key)) {
           diffPaths.push({
-            checked,
             path: `${path}.${key}`.replace(/^\./, ""),
             type: "added",
             to: obj2[key],

@@ -4,6 +4,7 @@ class jsonblobapi {
     this.id = id
     this.url = `https://jsonblob.com/api/jsonBlob/${id}`
     this.resetTimer()
+    this.checkDataChange()
   }
   openUrl() {
     window.open("https://jsonblob.com/" + this.id, "_blank")
@@ -13,64 +14,88 @@ class jsonblobapi {
       clearTimeout(this.t)
     }
     this.t = setTimeout(
-      (async () => {
-        if (window.intextarea) {
-          this.resetTimer()
-          return
-        }
-        var data = await this.load(true)
-        if (data !== window.lastdata) {
-          var changes = compareNestedJson(
-            JSON.parse(window.lastdata),
-            JSON.parse(data)
-          )
-          log(changes)
-          log("DATA CHANGED")
-          tryLocalSave(lastdata, "prev")
-          tryLocalSave(data, "new")
-          window.lastdata = data
-          loadAllData((data = JSON.parse(data)))
-          if (localStorage.sendnoti == "true") {
-            for (var change of changes) {
-              var func = (() => {
-                focus()
-              }).bind(this, change)
-              var id = change.path.split(".")[0]
-              switch (change.type) {
-                case "added":
-                  var name = change.to.name
-                  if (/^\d+$/.test(change.path))
-                    sendnoti(`Added new task: "${name}"`, func)
-                  if (/^\d+\.desc$/.test(change.path))
-                    sendnoti(
-                      `added description to task: "${name}"`,
-                      func
-                    )
-                  if (/^\d+\.completed$/.test(change.path))
-                    sendnoti(`completed task: "${name}"`, func)
-                  break
-                case "diff":
-                  log([data, id, data[id]])
-                  var name = data[id].name
-                  if (/^\d+\.desc$/.test(change.path))
-                    sendnoti(
-                      `changed description of task: "${name}"`,
-                      func
-                    )
-                  break
-                case "removed":
-                  if (/^\d+$/.test(change.path)) {
-                    var name = change.from.name
-                    sendnoti(`removed task: "${name}"`, func)
-                  }
-                  break
-              }
-            }
-          }
-        } else log("no data changed")
-      }).bind(this),
+      this.checkDataChange.bind(this),
       1 * (ls.refreshInterval ??= 30) * 1000
     )
+  }
+  async checkDataChange() {
+    if (window.intextarea) {
+      this.resetTimer()
+      return
+    }
+    var data = await this.load(true)
+    if (data !== ls.lastdata) {
+      var changes = compareNestedJson(
+        JSON.parse(ls.lastdata),
+        JSON.parse(data)
+      )
+      log(changes)
+      log("DATA CHANGED")
+      tryLocalSave(ls.lastdata, "prev")
+      tryLocalSave(data, "new")
+      ls.lastdata = data
+      loadAllData((data = JSON.parse(data)))
+      if (localStorage.sendnoti == "true") {
+        for (var change of changes) {
+          var func = (name) => {
+            focus()
+            if (name !== -1) {
+              window.filters = { name: { undefined: name } }
+              applyFilters()
+            }
+          }
+          var id = change.path.split(".")[0]
+          var name = data[id].name
+
+          switch (change.type) {
+            case "added":
+              // var name = change.to.name
+              if (/^\d+$/.test(change.path))
+                sendnoti(
+                  `Added new task: "${name}"`,
+                  func.bind(this, name)
+                )
+              if (/^\d+\.desc$/.test(change.path))
+                sendnoti(
+                  `added description to task: "${name}"`,
+                  func.bind(this, name)
+                )
+              if (/^\d+\.completed$/.test(change.path))
+                sendnoti(
+                  `completed task: "${name}"`,
+                  func.bind(this, name)
+                )
+              if (/^\d+\.comments/.test(change.path))
+                sendnoti(
+                  `${change.to.username} added comment to task: "${name}"`,
+                  func.bind(this, name)
+                )
+              break
+            case "diff":
+              if (/^\d+\.desc$/.test(change.path))
+                sendnoti(
+                  `changed description of task: "${name}"`,
+                  func.bind(this, name)
+                )
+              if (/^\d+\.comments/.test(change.path))
+                sendnoti(
+                  `edited comment on task: "${name}"`,
+                  func.bind(this, name)
+                )
+              break
+            case "removed":
+              if (/^\d+$/.test(change.path)) {
+                var name = change.from.name
+                sendnoti(
+                  `removed task: "${name}"`,
+                  func.bind(this, -1)
+                )
+              }
+              break
+          }
+        }
+      }
+    } else log("no data changed")
   }
   async load(dontsave) {
     if (this.saving) await this.__notSaving()
@@ -82,7 +107,7 @@ class jsonblobapi {
       error(e)
       toast("network error: failed to load", "red")
     }
-    if (!dontsave) window.lastdata = x
+    if (!dontsave) ls.lastdata = x
     this.saving--
     return x
   }
