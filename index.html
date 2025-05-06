@@ -838,17 +838,16 @@
     commentElem.thingname = name
     var commentsElem = a.qs("tr>td:nth-of-type(6)>#comments", child)
     function applyAts(text, parentid, sender, thingname) {
-      text = text.replace(
-        /(?<=[\b\s>]|^)@(\w+)/g,
-        function (_, name) {
+      text = text
+        .replace(/(?<=[\b\s>]|^)@(\w+)/g, function (_, name) {
           if (localStorage.name === name)
             return `<span class=atself parentid="${parentid}" sender="${sender}" thingname="${thingname.replace(
-              '"',
+              /[><"]/g,
               "_"
             )}">@${name}</span>`
           return `<span class=atother parentid="${parentid}">@${name}</span>`
-        }
-      )
+        })
+        .replace(/<h(\d)>/g, '<h$1 style="margin:0;">')
       return text
     }
     var self
