@@ -132,7 +132,7 @@
         opacity: 0.7;
         font-size: large;
         font-weight: 150;
-        pointer-events: none;
+        // pointer-events: none;
       }
       @keyframes fade {
         0% {
@@ -1192,12 +1192,22 @@
   }
 
   async function sendnoti(text, onclick = () => {}) {
-    if (await getNotificationPermission()) {
-      const notification = new Notification(text)
-      notification.onclick = onclick
-    } else {
-      toast("NOTIFICATION: " + text, "yellow")
-    }
+    log("asasjkasdhsadsdah")
+    var t = toast(text, "green", Infinity)
+    const notification =
+      localStorage.sendnoti && (await getNotificationPermission())
+        ? new Notification(text)
+        : {}
+    t.onclick = ((t, onclick, notification) => {
+      if (t) t.remove()
+      onclick()
+      notification?.close?.()
+    }).bind(null, t, onclick, notification)
+    notification.onclick = ((t, onclick, notification) => {
+      if (t) t.remove()
+      onclick()
+      notification?.close?.()
+    }).bind(null, t, onclick, notification)
   }
   async function getNotificationPermission() {
     try {

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         lib:allfuncs
-// @version      26
+// @version      27
 // @description  none
 // @run-at       document-start
 // @author       rssaromeo
